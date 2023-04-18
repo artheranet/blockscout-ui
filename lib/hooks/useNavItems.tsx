@@ -11,13 +11,10 @@ import depositsIcon from 'icons/arrows/south-east.svg';
 import blocksIcon from 'icons/block.svg';
 import gearIcon from 'icons/gear.svg';
 import globeIcon from 'icons/globe-b.svg';
-import graphQLIcon from 'icons/graphQL.svg';
 import outputRootsIcon from 'icons/output_roots.svg';
 import privateTagIcon from 'icons/privattags.svg';
 import profileIcon from 'icons/profile.svg';
 import publicTagIcon from 'icons/publictags.svg';
-import apiDocsIcon from 'icons/restAPI.svg';
-import rpcIcon from 'icons/RPC.svg';
 import statsIcon from 'icons/stats.svg';
 import tokensIcon from 'icons/token.svg';
 import topAccountsIcon from 'icons/top-accounts.svg';
@@ -65,7 +62,6 @@ export function isInternalItem(item: NavItem): item is NavItemInternal {
 
 export default function useNavItems(): ReturnType {
   const isMarketplaceFilled = appConfig.marketplaceAppList.length > 0 && appConfig.network.rpcUrl;
-  const hasAPIDocs = appConfig.apiDoc.specUrl;
 
   const router = useRouter();
   const pathname = router.pathname;
@@ -209,5 +205,5 @@ export default function useNavItems(): ReturnType {
     };
 
     return { mainNavItems, accountNavItems, profileItem };
-  }, [ hasAPIDocs, isMarketplaceFilled, pathname ]);
+  }, [ isMarketplaceFilled, pathname ]);
 }
