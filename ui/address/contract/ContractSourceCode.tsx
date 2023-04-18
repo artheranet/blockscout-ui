@@ -27,7 +27,7 @@ const ContractSourceCode = ({ data, hasSol2Yml, address, isViper, filePath, addi
     </Text>
   );
 
-  const diagramLink = hasSol2Yml && address ? (
+  const diagramLink = hasSol2Yml && false && address ? (
     <Tooltip label="Visualize contract code using Sol2Uml JS library">
       <LinkInternal
         href={ route({ pathname: '/visualize/sol2uml', query: { address } }) }
