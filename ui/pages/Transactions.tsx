@@ -38,11 +38,7 @@ const Transactions = () => {
     {
       id: 'validated',
       title: verifiedTitle,
-      component: <TxsContent query={ txsQuery } showSocketInfo={ isFirstPage } socketInfoNum={ num } socketInfoAlert={ socketAlert }/> },
-    {
-      id: 'pending',
-      title: 'Pending',
-      component: <TxsContent query={ txsQuery } showBlockInfo={ false } showSocketInfo={ isFirstPage } socketInfoNum={ num } socketInfoAlert={ socketAlert }/>,
+      component: <TxsContent query={ txsQuery } showSocketInfo={ isFirstPage } socketInfoNum={ num } socketInfoAlert={ socketAlert }/>
     },
   ];
 

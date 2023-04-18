@@ -60,7 +60,7 @@ const NavFooter = ({ isCollapsed, hasAccount }: Props) => {
       ) }
       <Box display={{ base: 'block', lg: isExpanded ? 'block' : 'none', xl: isCollapsed ? 'none' : 'block' }}>
         <Text variant="secondary" mb={ 8 }>
-            Blockscout is a tool for inspecting and analyzing EVM based blockchains. Blockchain explorer for Ethereum Networks.
+            Blockchain explorer for Arthera Networks, powered by Blockscout
         </Text>
         { appConfig.blockScoutVersion &&
           <Text variant="secondary">Version: <Link href={ VERSION_URL } target="_blank">{ appConfig.blockScoutVersion }</Link></Text> }

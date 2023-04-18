@@ -3,7 +3,6 @@ import React from 'react';
 
 import appConfig from 'configs/app/config';
 import { useScrollDirection } from 'lib/contexts/scrollDirection';
-import IndexingAlert from 'ui/home/IndexingAlert';
 import NetworkLogo from 'ui/snippets/networkMenu/NetworkLogo';
 import ProfileMenuDesktop from 'ui/snippets/profileMenu/ProfileMenuDesktop';
 import ProfileMenuMobile from 'ui/snippets/profileMenu/ProfileMenuMobile';
@@ -53,7 +52,7 @@ const Header = ({ isHomePage, renderSearchBar }: Props) => {
         paddingTop={ 9 }
         display={{ base: 'none', lg: 'block' }}
       >
-        <IndexingAlert/>
+        {/*<IndexingAlert/>*/}
         { !isHomePage && (
           <HStack
             as="header"

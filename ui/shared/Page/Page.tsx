@@ -27,7 +27,7 @@ const Page = ({
   renderHeader,
 }: Props) => {
 
-  useGetCsrfToken();
+  // useGetCsrfToken();
 
   useAdblockDetect();
 
