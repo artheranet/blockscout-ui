@@ -128,32 +128,7 @@ export default function useNavItems(): ReturnType {
       ];
     }
 
-    const otherNavItems: Array<NavItem> = [
-      hasAPIDocs ? {
-        text: 'REST API',
-        nextRoute: { pathname: '/api-docs' as const },
-        icon: apiDocsIcon,
-        isActive: pathname === '/api-docs',
-        isNewUi: true,
-      } : null,
-      {
-        text: 'GraphQL',
-        nextRoute: { pathname: '/graphiql' as const },
-        icon: graphQLIcon,
-        isActive: pathname === '/graphiql',
-        isNewUi: true,
-      },
-      {
-        text: 'RPC API',
-        icon: rpcIcon,
-        url: 'https://docs.blockscout.com/for-users/api/rpc-endpoints',
-      },
-      {
-        text: 'Eth RPC API',
-        icon: rpcIcon,
-        url: ' https://docs.blockscout.com/for-users/api/eth-rpc',
-      },
-    ].filter(Boolean);
+    const otherNavItems: Array<NavItem> = [];
 
     const mainNavItems = [
       {
