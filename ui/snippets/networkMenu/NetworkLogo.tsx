@@ -87,8 +87,8 @@ const NetworkLogo = ({ isCollapsed, onClick }: Props) => {
     <Box
       as="a"
       href={ href }
-      width={{ base: 'auto', lg: isCollapsed === false ? '113px' : '30px', xl: isCollapsed ? '30px' : '113px' }}
-      height={{ base: '20px', lg: isCollapsed === false ? '20px' : '30px', xl: isCollapsed ? '30px' : '20px' }}
+      width={{ base: 'auto', lg: isCollapsed === false ? '240px' : '40px', xl: isCollapsed ? '30px' : '240px' }}
+      height={{ base: '30px', lg: isCollapsed === false ? '40px' : '30px', xl: isCollapsed ? '30px' : '40px' }}
       display="inline-flex"
       overflow="hidden"
       onClick={ onClick }
