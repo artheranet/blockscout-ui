@@ -102,7 +102,7 @@ const config = Object.freeze({
   api: {
     host: apiHost,
     endpoint: apiEndpoint,
-    socket: apiHost ? `ws://${ apiHost }` : 'wss://blockscout.com',
+    socket: apiHost ? `wss://${ apiHost }` : 'wss://blockscout.com',
     basePath: stripTrailingSlash(getEnvValue(process.env.NEXT_PUBLIC_API_BASE_PATH) || ''),
   },
   L2: {
