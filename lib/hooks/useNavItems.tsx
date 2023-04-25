@@ -61,7 +61,7 @@ export function isInternalItem(item: NavItem): item is NavItemInternal {
 }
 
 export default function useNavItems(): ReturnType {
-  const isMarketplaceFilled = appConfig.marketplaceAppList.length > 0 && appConfig.network.rpcUrl;
+  const isMarketplaceAvailable = Boolean(appConfig.marketplaceConfigUrl && appConfig.network.rpcUrl);
 
   const router = useRouter();
   const pathname = router.pathname;
@@ -141,7 +141,7 @@ export default function useNavItems(): ReturnType {
         isActive: pathname.startsWith('/token'),
         isNewUi: true,
       },
-      isMarketplaceFilled ? {
+      isMarketplaceAvailable ? {
         text: 'Apps',
         nextRoute: { pathname: '/apps' as const },
         icon: appsIcon,
@@ -205,5 +205,5 @@ export default function useNavItems(): ReturnType {
     };
 
     return { mainNavItems, accountNavItems, profileItem };
-  }, [ isMarketplaceFilled, pathname ]);
+  }, [ isMarketplaceAvailable, pathname ]);
 }
