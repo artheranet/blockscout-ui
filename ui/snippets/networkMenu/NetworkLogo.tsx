@@ -36,67 +36,67 @@ const NetworkLogo = ({ isCollapsed, onClick }: Props) => {
     const smallLogo = appConfig.network.smallLogo;
 
     const fallbackLogo = (
-      <Icon
-        as={ fallbackLogoSrc || logoPlaceholder }
-        width="auto"
-        height="100%"
-        color={ fallbackLogoSrc ? undefined : logoColor }
-        display={{ base: 'block', lg: isCollapsed === false ? 'block' : 'none', xl: isCollapsed ? 'none' : 'block' }}
-        style={ style }
-      />
+        <Icon
+            as={ fallbackLogoSrc || logoPlaceholder }
+            width="auto"
+            height="100%"
+            color={ fallbackLogoSrc ? undefined : logoColor }
+            display={{ base: 'block', lg: isCollapsed === false ? 'block' : 'none', xl: isCollapsed ? 'none' : 'block' }}
+            style={ style }
+        />
     );
     const fallbackSmallLogo = (
-      <Icon
-        as={ fallbackSmallLogoSrc || smallLogoPlaceholder }
-        width="auto"
-        height="100%"
-        color={ fallbackSmallLogoSrc ? undefined : logoColor }
-        display={{ base: 'none', lg: isCollapsed === false ? 'none' : 'block', xl: isCollapsed ? 'block' : 'none' }}
-        style={ style }
-      />
+        <Icon
+            as={ fallbackSmallLogoSrc || smallLogoPlaceholder }
+            width="auto"
+            height="100%"
+            color={ fallbackSmallLogoSrc ? undefined : logoColor }
+            display={{ base: 'none', lg: isCollapsed === false ? 'none' : 'block', xl: isCollapsed ? 'block' : 'none' }}
+            style={ style }
+        />
     );
 
     return (
-      <>
-        { /* big logo */ }
-        <Image
-          w="auto"
-          h="100%"
-          src={ logo }
-          display={{ base: 'block', lg: isCollapsed === false ? 'block' : 'none', xl: isCollapsed ? 'none' : 'block' }}
-          alt={ `${ appConfig.network.name } network logo` }
-          fallback={ isLogoError || !logo ? fallbackLogo : undefined }
-          onError={ handleLogoError }
-        />
-        { /* small logo */ }
-        <Image
-          w="auto"
-          h="100%"
-          src={ smallLogo }
-          display={{ base: 'none', lg: isCollapsed === false ? 'none' : 'block', xl: isCollapsed ? 'block' : 'none' }}
-          alt={ `${ appConfig.network.name } network logo` }
-          fallback={ isSmallLogoError || !smallLogo ? fallbackSmallLogo : undefined }
-          onError={ handleSmallLogoError }
-        />
-      </>
+        <>
+          { /* big logo */ }
+          <Image
+              w="auto"
+              h="100%"
+              src={ logo }
+              display={{ base: 'block', lg: isCollapsed === false ? 'block' : 'none', xl: isCollapsed ? 'none' : 'block' }}
+              alt={ `${ appConfig.network.name } network logo` }
+              fallback={ isLogoError || !logo ? fallbackLogo : undefined }
+              onError={ handleLogoError }
+          />
+          { /* small logo */ }
+          <Image
+              w="auto"
+              h="100%"
+              src={ smallLogo }
+              display={{ base: 'none', lg: isCollapsed === false ? 'none' : 'block', xl: isCollapsed ? 'block' : 'none' }}
+              alt={ `${ appConfig.network.name } network logo` }
+              fallback={ isSmallLogoError || !smallLogo ? fallbackSmallLogo : undefined }
+              onError={ handleSmallLogoError }
+          />
+        </>
     );
   })();
 
   return (
-    // TODO switch to <NextLink href={ href } passHref> when main page for network will be ready
-    <Box
-      as="a"
-      href={ href }
-      width={{ base: 'auto', lg: isCollapsed === false ? '240px' : '40px', xl: isCollapsed ? '30px' : '240px' }}
-      height={{ base: '30px', lg: isCollapsed === false ? '40px' : '30px', xl: isCollapsed ? '30px' : '40px' }}
-      display="inline-flex"
-      overflow="hidden"
-      onClick={ onClick }
-      flexShrink={ 0 }
-      aria-label="Link to main page"
-    >
-      { logoEl }
-    </Box>
+      // TODO switch to <NextLink href={ href } passHref> when main page for network will be ready
+      <Box
+          as="a"
+          href={ href }
+          width={{ base: 'auto', lg: isCollapsed === false ? '240px' : '40px', xl: isCollapsed ? '30px' : '240px' }}
+          height={{ base: '30px', lg: isCollapsed === false ? '40px' : '30px', xl: isCollapsed ? '30px' : '40px' }}
+          display="inline-flex"
+          overflow="hidden"
+          onClick={ onClick }
+          flexShrink={ 0 }
+          aria-label="Link to main page"
+      >
+        { logoEl }
+      </Box>
   );
 };
 

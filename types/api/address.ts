@@ -3,7 +3,7 @@ import type { Transaction } from 'types/api/transaction';
 import type { AddressTag, WatchlistName } from './addressParams';
 import type { Block } from './block';
 import type { InternalTransaction } from './internalTransaction';
-import type { TokenInfo, TokenType } from './token';
+import type { TokenInfo, TokenInstance, TokenType } from './token';
 import type { TokenTransfer, TokenTransferPagination } from './tokenTransfer';
 
 export interface Address {
@@ -12,6 +12,7 @@ export interface Address {
   creator_address_hash: string | null;
   creation_tx_hash: string | null;
   exchange_rate: string | null;
+  has_beacon_chain_withdrawals?: boolean;
   has_custom_methods_read: boolean;
   has_custom_methods_write: boolean;
   has_decompiled_code: boolean;
@@ -47,6 +48,7 @@ export interface AddressTokenBalance {
   token: TokenInfo;
   token_id: string | null;
   value: string;
+  token_instance?: TokenInstance;
 }
 
 export interface AddressTokensResponse {
@@ -127,4 +129,20 @@ export interface AddressInternalTxsResponse {
     items_count: number;
     transaction_index: number;
   } | null;
+}
+
+export type AddressWithdrawalsResponse = {
+  items: Array<AddressWithdrawalsItem>;
+  next_page_params: {
+    index: number;
+    items_count: number;
+  };
+}
+
+export type AddressWithdrawalsItem = {
+  amount: string;
+  block_number: number;
+  index: number;
+  timestamp: string;
+  validator_index: number;
 }

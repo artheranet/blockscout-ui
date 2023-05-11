@@ -40,10 +40,10 @@ frontend:
         - "/csv-export"
         - "/verified-contracts"
         - "/graphiql"
-        - "/output-roots"
-        - "/txn-batches"
-        - "/withdrawals"
-        - "/deposits"
+        - "/l2-output-roots"
+        - "/l2-txn-batches"
+        - "/l2-withdrawals"
+        - "/l2-deposits"
 
   resources:
     limits:
@@ -73,8 +73,6 @@ frontend:
       _default: Base
     NEXT_PUBLIC_NETWORK_ASSETS_PATHNAME:
       _default: optimism
-    NEXT_PUBLIC_NETWORK_TYPE:
-      _default: base_goerli
     NEXT_PUBLIC_NETWORK_ID:
       _default: 420
     NEXT_PUBLIC_NETWORK_CURRENCY_NAME:
@@ -87,8 +85,12 @@ frontend:
       _default: validation
     NEXT_PUBLIC_IS_ACCOUNT_SUPPORTED:
       _default: 'true'
+    NEXT_PUBLIC_NETWORK_LOGO:
+      _default: https://raw.githubusercontent.com/blockscout/frontend-configs/main/configs/network-logos/base.svg
+    NEXT_PUBLIC_NETWORK_ICON:
+      _default: https://raw.githubusercontent.com/blockscout/frontend-configs/main/configs/network-icons/base.svg
     NEXT_PUBLIC_FEATURED_NETWORKS:
-      _default: "[{'title':'Göerli','url':'https://eth-goerli.blockscout.com/','group':'testnets','type':'goerli'},{'title':'Base Göerli','url':'https://l2-goerli.blockscout.com/','group':'testnets','type':'base_goerli'}]"
+      _default: https://raw.githubusercontent.com/blockscout/frontend-configs/dev/configs/featured-networks/base-goerli.json
     NEXT_PUBLIC_API_HOST:
       _default: blockscout-optimism-goerli.test.aws-k8s.blockscout.com
       review: blockscout-optimism-goerli.test.aws-k8s.blockscout.com
@@ -117,6 +119,10 @@ frontend:
       _default: ''
     NEXT_PUBLIC_NETWORK_RPC_URL:
       _default: https://goerli.optimism.io
+    NEXT_PUBLIC_WEB3_DEFAULT_WALLET:
+      _default: coinbase
+    NEXT_PUBLIC_WEB3_DISABLE_ADD_TOKEN_TO_WALLET:
+      _default: true
     NEXT_PUBLIC_HOMEPAGE_CHARTS:
       _default: "['daily_txs']"
     NEXT_PUBLIC_IS_TESTNET:

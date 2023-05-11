@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-properties */
-import type { FeaturedNetwork, NetworkExplorer, PreDefinedNetwork } from 'types/networks';
+import type { WalletType } from 'types/client/wallets';
+import type { NetworkExplorer } from 'types/networks';
 import type { ChainIndicatorId } from 'ui/home/indicators/types';
 
 const getEnvValue = (env: string | undefined) => env?.replaceAll('\'', '"');
@@ -11,6 +12,15 @@ const parseEnvJson = <DataType>(env: string | undefined): DataType | null => {
   }
 };
 const stripTrailingSlash = (str: string) => str[str.length - 1] === '/' ? str.slice(0, -1) : str;
+const getWeb3DefaultWallet = (): WalletType => {
+  const envValue = getEnvValue(process.env.NEXT_PUBLIC_WEB3_DEFAULT_WALLET);
+  const SUPPORTED_WALLETS: Array<WalletType> = [
+    'metamask',
+    'coinbase',
+  ];
+
+  return (envValue && SUPPORTED_WALLETS.includes(envValue) ? envValue : 'metamask') as WalletType;
+};
 
 const env = process.env.NODE_ENV;
 const isDev = env === 'development';
@@ -34,6 +44,8 @@ const apiEndpoint = apiHost ? [
   apiHost,
   apiPort && ':' + apiPort,
 ].filter(Boolean).join('') : 'https://blockscout.com';
+
+const socketSchema = getEnvValue(process.env.NEXT_PUBLIC_API_WEBSOCKET_PROTOCOL) || 'wss';
 
 const logoutUrl = (() => {
   try {
@@ -59,9 +71,14 @@ const config = Object.freeze({
   env,
   isDev,
   network: {
-    type: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_TYPE) as PreDefinedNetwork | undefined,
-    logo: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_LOGO),
-    smallLogo: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_SMALL_LOGO),
+    logo: {
+      'default': getEnvValue(process.env.NEXT_PUBLIC_NETWORK_LOGO),
+      dark: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_LOGO_DARK),
+    },
+    icon: {
+      'default': getEnvValue(process.env.NEXT_PUBLIC_NETWORK_ICON),
+      dark: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_ICON_DARK),
+    },
     name: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_NAME),
     id: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_ID),
     shortName: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_SHORT_NAME),
@@ -83,7 +100,7 @@ const config = Object.freeze({
     telegram: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_TELEGRAM_LINK),
     staking: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_STAKING_LINK),
   },
-  featuredNetworks: parseEnvJson<Array<FeaturedNetwork>>(getEnvValue(process.env.NEXT_PUBLIC_FEATURED_NETWORKS)) || [],
+  featuredNetworks: getEnvValue(process.env.NEXT_PUBLIC_FEATURED_NETWORKS),
   blockScoutVersion: getEnvValue(process.env.NEXT_PUBLIC_BLOCKSCOUT_VERSION),
   isAccountSupported: getEnvValue(process.env.NEXT_PUBLIC_IS_ACCOUNT_SUPPORTED) === 'true',
   marketplaceConfigUrl: getEnvValue(process.env.NEXT_PUBLIC_MARKETPLACE_CONFIG_URL),
@@ -98,16 +115,23 @@ const config = Object.freeze({
     domainWithAd: getEnvValue(process.env.NEXT_PUBLIC_AD_DOMAIN_WITH_AD) || 'blockscout.com',
     adButlerOn: getEnvValue(process.env.NEXT_PUBLIC_AD_ADBUTLER_ON) === 'true',
   },
+  web3: {
+    defaultWallet: getWeb3DefaultWallet(),
+    disableAddTokenToWallet: getEnvValue(process.env.NEXT_PUBLIC_WEB3_DISABLE_ADD_TOKEN_TO_WALLET) === 'true',
+  },
   api: {
     host: apiHost,
     endpoint: apiEndpoint,
-    socket: apiHost ? `wss://${ apiHost }` : 'wss://blockscout.com',
+    socket: apiHost ? `${ socketSchema }://${ apiHost }` : 'wss://blockscout.com',
     basePath: stripTrailingSlash(getEnvValue(process.env.NEXT_PUBLIC_API_BASE_PATH) || ''),
   },
   L2: {
     isL2Network: getEnvValue(process.env.NEXT_PUBLIC_IS_L2_NETWORK) === 'true',
     L1BaseUrl: getEnvValue(process.env.NEXT_PUBLIC_L1_BASE_URL),
     withdrawalUrl: getEnvValue(process.env.NEXT_PUBLIC_L2_WITHDRAWAL_URL) || '',
+  },
+  beaconChain: {
+    hasBeaconChain: getEnvValue(process.env.NEXT_PUBLIC_HAS_BEACON_CHAIN) === 'true',
   },
   statsApi: {
     endpoint: getEnvValue(process.env.NEXT_PUBLIC_STATS_API_HOST),
@@ -119,8 +143,11 @@ const config = Object.freeze({
   },
   homepage: {
     charts: parseEnvJson<Array<ChainIndicatorId>>(getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_CHARTS)) || [],
-    plateGradient: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_PLATE_GRADIENT) ||
-      'radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%)',
+    plate: {
+      gradient: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_PLATE_GRADIENT) ||
+        'radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%)',
+      textColor: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_PLATE_TEXT_COLOR) || 'white',
+    },
     showGasTracker: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_SHOW_GAS_TRACKER) === 'false' ? false : true,
     showAvgBlockTime: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_SHOW_AVG_BLOCK_TIME) === 'false' ? false : true,
   },

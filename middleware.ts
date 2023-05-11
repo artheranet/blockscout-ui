@@ -17,7 +17,9 @@ export function middleware(req: NextRequest) {
   }
 
   // we don't have any info from router here, so just do straight forward sub-string search (sorry)
-  const isAccountRoute = req.nextUrl.pathname.includes('/account/');
+  const isAccountRoute =
+    req.nextUrl.pathname.includes('/account/') ||
+    (req.nextUrl.pathname === '/txs' && req.nextUrl.searchParams.get('tab') === 'watchlist');
   const isProfileRoute = req.nextUrl.pathname.includes('/auth/profile');
   const apiToken = req.cookies.get(NAMES.API_TOKEN);
 
@@ -30,6 +32,8 @@ export function middleware(req: NextRequest) {
   const res = NextResponse.next();
   res.headers.append('Content-Security-Policy', cspPolicy);
   res.headers.append('Server-Timing', `middleware;dur=${ end - start }`);
+  // eslint-disable-next-line no-restricted-properties
+  res.headers.append('Docker-ID', process.env.HOSTNAME || '');
 
   return res;
 }

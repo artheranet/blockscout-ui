@@ -6,6 +6,7 @@ import chevronIcon from 'icons/arrows/east-mini.svg';
 import testnetIcon from 'icons/testnet.svg';
 import { useAppContext } from 'lib/appContext';
 import * as cookies from 'lib/cookies';
+import useHasAccount from 'lib/hooks/useHasAccount';
 import useNavItems, { isGroupItem } from 'lib/hooks/useNavItems';
 import getDefaultTransitionProps from 'theme/utils/getDefaultTransitionProps';
 import NetworkLogo from 'ui/snippets/networkMenu/NetworkLogo';
@@ -28,11 +29,10 @@ const NavigationDesktop = () => {
     isNavBarCollapsed = false;
   }
 
-  const hasAuth = Boolean(cookies.get(cookies.NAMES.API_TOKEN, cookiesString));
-
   const { mainNavItems, accountNavItems } = useNavItems();
 
-  const hasAccount = hasAuth && appConfig.isAccountSupported;
+  const hasAccount = useHasAccount();
+
   const [ isCollapsed, setCollapsedState ] = React.useState<boolean | undefined>(isNavBarCollapsed);
 
   const handleTogglerClick = React.useCallback(() => {
@@ -77,7 +77,7 @@ const NavigationDesktop = () => {
         transitionTimingFunction="ease"
       >
         <NetworkLogo isCollapsed={ isCollapsed }/>
-        { appConfig.featuredNetworks.length > 0 && <NetworkMenu isCollapsed={ isCollapsed }/> }
+        { Boolean(appConfig.featuredNetworks) && <NetworkMenu isCollapsed={ isCollapsed }/> }
       </Box>
       <Box as="nav" mt={ 8 } w="100%">
         <VStack as="ul" spacing="1" alignItems="flex-start">
