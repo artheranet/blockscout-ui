@@ -68,7 +68,7 @@ const ChartsWidgetsList = ({ filterQuery, isError, isPlaceholderData, charts, in
                     title={ chart.title }
                     description={ chart.description }
                     interval={ interval }
-                    units={ chart.units === 'ETH' ? 'AA' || undefined }
+                    units={ chart.units === 'ETH' ? 'AA' : undefined }
                     isPlaceholderData={ isPlaceholderData }
                     onLoadingError={ handleChartLoadingError }
                   />

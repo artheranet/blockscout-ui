@@ -6,6 +6,7 @@ import { KEY_WORDS } from '../utils';
 
 const MAIN_DOMAINS = [
   `*.${ appConfig.host }`,
+  `*.arthera.net`,
   appConfig.host,
   appConfig.visualizeApi.endpoint,
 ].filter(Boolean);
