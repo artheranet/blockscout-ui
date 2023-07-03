@@ -6,7 +6,7 @@ import type { SocketMessage } from 'lib/socket/types';
 import type { IndexingStatus } from 'types/api/indexingStatus';
 
 import useApiQuery, { getResourceKey } from 'lib/api/useApiQuery';
-import { useAppContext } from 'lib/appContext';
+import { useAppContext } from 'lib/contexts/app';
 import * as cookies from 'lib/cookies';
 import useIsMobile from 'lib/hooks/useIsMobile';
 import { nbsp, ndash } from 'lib/html-entities';
@@ -97,7 +97,7 @@ const IndexingAlert = ({ className }: { className?: string }) => {
   }
 
   return (
-    <Alert status="warning" variant="solid" py={ 3 } borderRadius="12px" mb={ 6 } className={ className }>
+    <Alert status="info" colorScheme="gray" py={ 3 } borderRadius="12px" mb={ 6 } className={ className }>
       { !isMobile && <AlertIcon/> }
       <AlertTitle>
         { content }

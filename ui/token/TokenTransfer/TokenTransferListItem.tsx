@@ -1,4 +1,4 @@
-import { Text, Flex, Icon, useColorModeValue, Skeleton } from '@chakra-ui/react';
+import { Flex, useColorModeValue, Skeleton } from '@chakra-ui/react';
 import BigNumber from 'bignumber.js';
 import React from 'react';
 
@@ -11,6 +11,7 @@ import trimTokenSymbol from 'lib/token/trimTokenSymbol';
 import Address from 'ui/shared/address/Address';
 import AddressIcon from 'ui/shared/address/AddressIcon';
 import AddressLink from 'ui/shared/address/AddressLink';
+import Icon from 'ui/shared/chakra/Icon';
 import Tag from 'ui/shared/chakra/Tag';
 import CopyToClipboard from 'ui/shared/CopyToClipboard';
 import ListItemMobile from 'ui/shared/ListItemMobile/ListItemMobile';
@@ -45,14 +46,13 @@ const TokenTransferListItem = ({
     <ListItemMobile rowGap={ 3 } isAnimated>
       <Flex justifyContent="space-between" alignItems="center" lineHeight="24px" width="100%">
         <Flex>
-          <Skeleton isLoaded={ !isLoading } boxSize="30px" mr={ 2 }>
-            <Icon
-              as={ transactionIcon }
-              boxSize="30px"
-              color={ iconColor }
-            />
-          </Skeleton>
-          <Address width="100%">
+          <Icon
+            as={ transactionIcon }
+            boxSize="30px"
+            color={ iconColor }
+            isLoading={ isLoading }
+          />
+          <Address width="100%" ml={ 2 }>
             <AddressLink
               hash={ txHash }
               type="transaction"
@@ -63,13 +63,11 @@ const TokenTransferListItem = ({
           </Address>
         </Flex>
         { timestamp && (
-          <Text variant="secondary" fontWeight="400" fontSize="sm">
-            <Skeleton isLoaded={ !isLoading } display="inline-block">
-              <span>
-                { timeAgo }
-              </span>
-            </Skeleton>
-          </Text>
+          <Skeleton isLoaded={ !isLoading } display="inline-block" fontWeight="400" fontSize="sm" color="text_secondary">
+            <span>
+              { timeAgo }
+            </span>
+          </Skeleton>
         ) }
       </Flex>
       { method && <Tag isLoading={ isLoading }>{ method }</Tag> }
@@ -79,9 +77,7 @@ const TokenTransferListItem = ({
           <AddressLink ml={ 2 } fontWeight="500" hash={ from.hash } type="address_token" tokenHash={ token.address } isLoading={ isLoading }/>
           <CopyToClipboard text={ from.hash } isLoading={ isLoading }/>
         </Address>
-        <Skeleton isLoaded={ !isLoading } boxSize={ 6 }>
-          <Icon as={ eastArrowIcon } boxSize={ 6 } color="gray.500"/>
-        </Skeleton>
+        <Icon as={ eastArrowIcon } boxSize={ 6 } color="gray.500" isLoading={ isLoading }/>
         <Address width="50%">
           <AddressIcon address={ to } isLoading={ isLoading }/>
           <AddressLink ml={ 2 } fontWeight="500" hash={ to.hash } type="address_token" tokenHash={ token.address } isLoading={ isLoading }/>
@@ -93,8 +89,8 @@ const TokenTransferListItem = ({
           <Skeleton isLoaded={ !isLoading } flexShrink={ 0 } fontWeight={ 500 }>
             Value
           </Skeleton>
-          <Skeleton isLoaded={ !isLoading } variant="secondary">
-            { value }
+          <Skeleton isLoaded={ !isLoading } color="text_secondary">
+            <span>{ value }</span>
           </Skeleton>
           <Skeleton isLoaded={ !isLoading }>{ trimTokenSymbol(token.symbol) }</Skeleton>
         </Flex>

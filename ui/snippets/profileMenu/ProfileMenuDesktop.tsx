@@ -1,3 +1,4 @@
+import type { ButtonProps } from '@chakra-ui/react';
 import { Popover, PopoverContent, PopoverBody, PopoverTrigger, Button } from '@chakra-ui/react';
 import React from 'react';
 
@@ -7,8 +8,26 @@ import UserAvatar from 'ui/shared/UserAvatar';
 import ProfileMenuContent from 'ui/snippets/profileMenu/ProfileMenuContent';
 
 const ProfileMenuDesktop = () => {
-  const { data, isFetched } = useFetchProfileInfo();
+  const { data, error, isLoading } = useFetchProfileInfo();
   const loginUrl = useLoginUrl();
+  const [ hasMenu, setHasMenu ] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!isLoading) {
+      setHasMenu(Boolean(data) || error?.status === 403);
+    }
+  }, [ data, error?.status, isLoading ]);
+
+  const buttonProps: Partial<ButtonProps> = (() => {
+    if (hasMenu) {
+      return {};
+    }
+
+    return {
+      as: 'a',
+      href: loginUrl,
+    };
+  })();
 
   return (
     <Popover openDelay={ 300 } placement="bottom-end" gutter={ 10 } isLazy>
@@ -18,16 +37,15 @@ const ProfileMenuDesktop = () => {
           display="inline-flex"
           height="auto"
           flexShrink={ 0 }
-          as={ data ? undefined : 'a' }
-          href={ data ? undefined : loginUrl }
+          { ...buttonProps }
         >
-          <UserAvatar size={ 50 } data={ data } isFetched={ isFetched }/>
+          <UserAvatar size={ 50 }/>
         </Button>
       </PopoverTrigger>
-      { data && (
+      { hasMenu && (
         <PopoverContent w="212px">
           <PopoverBody padding="24px 16px 16px 16px">
-            <ProfileMenuContent { ...data }/>
+            <ProfileMenuContent data={ data }/>
           </PopoverBody>
         </PopoverContent>
       ) }

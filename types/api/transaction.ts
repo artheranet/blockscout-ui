@@ -47,6 +47,7 @@ export type Transaction = {
   l1_fee_scalar?: string;
   l1_gas_price?: string;
   l1_gas_used?: string;
+  has_error_in_internal_txs: boolean | null;
 }
 
 export type TransactionsResponse = TransactionsResponseValidated | TransactionsResponsePending;
@@ -73,9 +74,9 @@ export interface TransactionsResponsePending {
 export interface TransactionsResponseWatchlist {
   items: Array<Transaction>;
   next_page_params: {
-    inserted_at: string;
-    hash: string;
-    filter: 'pending';
+    block_number: number;
+    index: number;
+    items_count: 50;
   } | null;
 }
 

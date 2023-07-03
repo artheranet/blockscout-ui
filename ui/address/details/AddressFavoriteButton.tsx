@@ -3,13 +3,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import type { UserInfo } from 'types/api/account';
-
 import starFilledIcon from 'icons/star_filled.svg';
 import starOutlineIcon from 'icons/star_outline.svg';
-import { resourceKey } from 'lib/api/resources';
 import { getResourceKey } from 'lib/api/useApiQuery';
-import useLoginUrl from 'lib/hooks/useLoginUrl';
+import useIsAccountActionAllowed from 'lib/hooks/useIsAccountActionAllowed';
 import usePreventFocusAfterModalClosing from 'lib/hooks/usePreventFocusAfterModalClosing';
 import WatchlistAddModal from 'ui/watchlist/AddressModal/AddressModal';
 import DeleteAddressModal from 'ui/watchlist/DeleteAddressModal';
@@ -25,18 +22,14 @@ const AddressFavoriteButton = ({ className, hash, watchListId }: Props) => {
   const deleteModalProps = useDisclosure();
   const queryClient = useQueryClient();
   const router = useRouter();
-
-  const profileData = queryClient.getQueryData<UserInfo>([ resourceKey('user_info') ]);
-  const isAuth = Boolean(profileData);
-  const loginUrl = useLoginUrl();
+  const isAccountActionAllowed = useIsAccountActionAllowed();
 
   const handleClick = React.useCallback(() => {
-    if (!isAuth) {
-      window.location.assign(loginUrl);
+    if (!isAccountActionAllowed({ pathname: '/account/watchlist' })) {
       return;
     }
     watchListId ? deleteModalProps.onOpen() : addModalProps.onOpen();
-  }, [ addModalProps, deleteModalProps, watchListId, isAuth, loginUrl ]);
+  }, [ isAccountActionAllowed, watchListId, deleteModalProps, addModalProps ]);
 
   const handleAddOrDeleteSuccess = React.useCallback(async() => {
     const queryKey = getResourceKey('address', { pathParams: { hash: router.query.hash?.toString() } });
@@ -70,6 +63,7 @@ const AddressFavoriteButton = ({ className, hash, watchListId }: Props) => {
           size="sm"
           pl="6px"
           pr="6px"
+          flexShrink={ 0 }
           onClick={ handleClick }
           icon={ <Icon as={ watchListId ? starFilledIcon : starOutlineIcon } boxSize={ 5 }/> }
           onFocusCapture={ usePreventFocusAfterModalClosing() }

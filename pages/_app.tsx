@@ -6,10 +6,10 @@ import React, { useState } from 'react';
 
 import appConfig from 'configs/app/config';
 import type { ResourceError } from 'lib/api/resources';
-import { AppContextProvider } from 'lib/appContext';
-import { Chakra } from 'lib/Chakra';
+import { AppContextProvider } from 'lib/contexts/app';
+import { ChakraProvider } from 'lib/contexts/chakra';
 import { ScrollDirectionProvider } from 'lib/contexts/scrollDirection';
-import getErrorStatusCode from 'lib/errors/getErrorStatusCode';
+import getErrorCauseStatusCode from 'lib/errors/getErrorCauseStatusCode';
 import useConfigSentry from 'lib/hooks/useConfigSentry';
 import { SocketProvider } from 'lib/socket/context';
 import theme from 'theme';
@@ -20,14 +20,16 @@ import GoogleAnalytics from 'ui/shared/GoogleAnalytics';
 import 'lib/setLocale';
 
 function MyApp({ Component, pageProps }: AppProps) {
+
   useConfigSentry();
+
   const [ queryClient ] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
         refetchOnWindowFocus: false,
         retry: (failureCount, _error) => {
           const error = _error as ResourceError<{ status: number }>;
-          const status = error?.status || error?.payload?.status;
+          const status = error?.payload?.status || error?.status;
           if (status && status >= 400 && status < 500) {
             // don't do retry for client error responses
             return false;
@@ -40,7 +42,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }));
 
   const renderErrorScreen = React.useCallback((error?: Error) => {
-    const statusCode = getErrorStatusCode(error);
+    const statusCode = getErrorCauseStatusCode(error);
 
     return (
       <AppError
@@ -61,7 +63,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <Chakra theme={ theme } cookies={ pageProps.cookies }>
+    <ChakraProvider theme={ theme } cookies={ pageProps.cookies }>
       <ErrorBoundary renderErrorScreen={ renderErrorScreen } onError={ handleError }>
         <AppContextProvider pageProps={ pageProps }>
           <QueryClientProvider client={ queryClient }>
@@ -75,7 +77,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           </QueryClientProvider>
         </AppContextProvider>
       </ErrorBoundary>
-    </Chakra>
+    </ChakraProvider>
   );
 }
 

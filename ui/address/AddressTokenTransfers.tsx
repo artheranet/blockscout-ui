@@ -14,17 +14,18 @@ import { getResourceKey } from 'lib/api/useApiQuery';
 import getFilterValueFromQuery from 'lib/getFilterValueFromQuery';
 import getFilterValuesFromQuery from 'lib/getFilterValuesFromQuery';
 import useIsMobile from 'lib/hooks/useIsMobile';
-import useQueryWithPages from 'lib/hooks/useQueryWithPages';
 import { apos } from 'lib/html-entities';
 import getQueryParamString from 'lib/router/getQueryParamString';
 import useSocketChannel from 'lib/socket/useSocketChannel';
 import useSocketMessage from 'lib/socket/useSocketMessage';
 import TOKEN_TYPE from 'lib/token/tokenTypes';
+import { getTokenTransfersStub } from 'stubs/token';
 import ActionBar from 'ui/shared/ActionBar';
 import DataListDisplay from 'ui/shared/DataListDisplay';
 import HashStringShorten from 'ui/shared/HashStringShorten';
-import Pagination from 'ui/shared/Pagination';
-import SocketNewItemsNotice from 'ui/shared/SocketNewItemsNotice';
+import Pagination from 'ui/shared/pagination/Pagination';
+import useQueryWithPages from 'ui/shared/pagination/useQueryWithPages';
+import * as SocketNewItemsNotice from 'ui/shared/SocketNewItemsNotice';
 import TokenLogo from 'ui/shared/TokenLogo';
 import TokenTransferFilter from 'ui/shared/TokenTransfer/TokenTransferFilter';
 import TokenTransferList from 'ui/shared/TokenTransfer/TokenTransferList';
@@ -62,7 +63,13 @@ const matchFilters = (filters: Filters, tokenTransfer: TokenTransfer, address?: 
   return true;
 };
 
-const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLDivElement>}) => {
+type Props = {
+  scrollRef?: React.RefObject<HTMLDivElement>;
+  // for tests only
+  overloadCount?: number;
+}
+
+const AddressTokenTransfers = ({ scrollRef, overloadCount = OVERLOAD_COUNT }: Props) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
@@ -81,11 +88,18 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
     },
   );
 
-  const { isError, isLoading, data, pagination, onFilterChange, isPaginationVisible } = useQueryWithPages({
+  const { isError, isPlaceholderData, data, pagination, onFilterChange } = useQueryWithPages({
     resourceName: 'address_token_transfers',
     pathParams: { hash: currentAddress },
     filters: tokenFilter ? { token: tokenFilter } : filters,
     scrollRef,
+    options: {
+      placeholderData: getTokenTransfersStub(undefined, {
+        block_number: 7793535,
+        index: 46,
+        items_count: 50,
+      }),
+    },
   });
 
   const handleTypeFilterChange = React.useCallback((nextValue: Array<TokenType>) => {
@@ -109,11 +123,26 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
   const handleNewSocketMessage: SocketMessage.AddressTokenTransfer['handler'] = (payload) => {
     setSocketAlert('');
 
-    if (data?.items && data.items.length >= OVERLOAD_COUNT) {
-      if (matchFilters(filters, payload.token_transfer, currentAddress)) {
-        setNewItemsCount(prev => prev + 1);
+    const newItems: Array<TokenTransfer> = [];
+    let newCount = 0;
+
+    payload.token_transfers.forEach(transfer => {
+      if (data?.items && data.items.length + newItems.length >= overloadCount) {
+        if (matchFilters(filters, transfer, currentAddress)) {
+          newCount++;
+        }
+      } else {
+        if (matchFilters(filters, transfer, currentAddress)) {
+          newItems.push(transfer);
+        }
       }
-    } else {
+    });
+
+    if (newCount > 0) {
+      setNewItemsCount(prev => prev + newCount);
+    }
+
+    if (newItems.length > 0) {
       queryClient.setQueryData(
         getResourceKey('address_token_transfers', { pathParams: { hash: currentAddress }, queryParams: { ...filters } }),
         (prevData: AddressTokenTransferResponse | undefined) => {
@@ -121,19 +150,17 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
             return;
           }
 
-          if (!matchFilters(filters, payload.token_transfer, currentAddress)) {
-            return prevData;
-          }
-
           return {
             ...prevData,
             items: [
-              payload.token_transfer,
+              ...newItems,
               ...prevData.items,
             ],
           };
-        });
+        },
+      );
     }
+
   };
 
   const handleSocketClose = React.useCallback(() => {
@@ -172,16 +199,17 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
           showSocketInfo={ pagination.page === 1 && !tokenFilter }
           socketInfoAlert={ socketAlert }
           socketInfoNum={ newItemsCount }
+          isLoading={ isPlaceholderData }
         />
       </Hide>
       <Show below="lg" ssr={ false }>
         { pagination.page === 1 && !tokenFilter && (
-          <SocketNewItemsNotice
+          <SocketNewItemsNotice.Mobile
             url={ window.location.href }
             num={ newItemsCount }
             alert={ socketAlert }
             type="token_transfer"
-            borderBottomRadius={ 0 }
+            isLoading={ isPlaceholderData }
           />
         ) }
         <TokenTransferList
@@ -189,16 +217,23 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
           baseAddress={ currentAddress }
           showTxInfo
           enableTimeIncrement
+          isLoading={ isPlaceholderData }
         />
       </Show>
     </>
   ) : null;
 
+  const tokenData = React.useMemo(() => ({
+    address: tokenFilter || '',
+    name: '',
+    icon_url: '',
+  }), [ tokenFilter ]);
+
   const tokenFilterComponent = tokenFilter && (
     <Flex alignItems="center" flexWrap="wrap" mb={{ base: isActionBarHidden ? 3 : 6, lg: 0 }} mr={ 4 }>
       <Text whiteSpace="nowrap" mr={ 2 } py={ 1 }>Filtered by token</Text>
       <Flex alignItems="center" py={ 1 }>
-        <TokenLogo hash={ tokenFilter } boxSize={ 6 } mr={ 2 }/>
+        <TokenLogo data={ tokenData } boxSize={ 6 } mr={ 2 }/>
         { isMobile ? <HashStringShorten hash={ tokenFilter }/> : tokenFilter }
         <Tooltip label="Reset filter">
           <Flex>
@@ -221,7 +256,7 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
     <>
       { isMobile && tokenFilterComponent }
       { !isActionBarHidden && (
-        <ActionBar mt={ -6 } showShadow={ isLoading }>
+        <ActionBar mt={ -6 }>
           { !isMobile && tokenFilterComponent }
           { !tokenFilter && (
             <TokenTransferFilter
@@ -231,10 +266,18 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
               withAddressFilter
               onAddressFilterChange={ handleAddressFilterChange }
               defaultAddressFilter={ filters.filter }
+              isLoading={ isPlaceholderData }
             />
           ) }
-          { currentAddress && <AddressCsvExportLink address={ currentAddress } type="token-transfers" ml={{ base: 2, lg: 'auto' }}/> }
-          { isPaginationVisible && <Pagination ml={{ base: 'auto', lg: 8 }} { ...pagination }/> }
+          { currentAddress && (
+            <AddressCsvExportLink
+              address={ currentAddress }
+              params={{ type: 'token-transfers', filterType: 'address', filterValue: filters.filter }}
+              ml={{ base: 2, lg: 'auto' }}
+              isLoading={ isPlaceholderData }
+            />
+          ) }
+          <Pagination ml={{ base: 'auto', lg: 8 }} { ...pagination }/>
         </ActionBar>
       ) }
     </>
@@ -243,12 +286,7 @@ const AddressTokenTransfers = ({ scrollRef }: {scrollRef?: React.RefObject<HTMLD
   return (
     <DataListDisplay
       isError={ isError }
-      isLoading={ isLoading }
       items={ data?.items }
-      skeletonProps={{
-        isLongSkeleton: true,
-        skeletonDesktopColumns: [ '44px', '185px', '160px', '25%', '25%', '25%', '25%' ],
-      }}
       emptyText="There are no token transfers."
       filterProps={{
         emptyFilteredText: `Couldn${ apos }t find any token transfer that matches your query.`,

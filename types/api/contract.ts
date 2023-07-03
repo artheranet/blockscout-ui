@@ -15,6 +15,7 @@ export interface SmartContract {
   name: string | null;
   verified_at: string | null;
   is_verified: boolean | null;
+  is_verified_via_eth_bytecode_db: boolean | null;
   is_changed_bytecode: boolean | null;
   // sourcify info >>>
   is_verified_via_sourcify: boolean | null;
@@ -26,7 +27,6 @@ export interface SmartContract {
   constructor_args: string | null;
   decoded_constructor_args: Array<SmartContractDecodedConstructorArg> | null;
   can_be_visualized_via_sol2uml: boolean | null;
-  is_vyper_contract: boolean | null;
   file_path: string;
   additional_sources: Array<{ file_path: string; source_code: string }>;
   external_libraries: Array<SmartContractExternalLibrary> | null;
@@ -36,6 +36,7 @@ export interface SmartContract {
   };
   verified_twin_address_hash: string | null;
   minimal_proxy_address_hash: string | null;
+  language: string | null;
 }
 
 export type SmartContractDecodedConstructorArg = [
@@ -90,7 +91,7 @@ export interface SmartContractMethodInput {
 }
 
 export interface SmartContractMethodOutput extends SmartContractMethodInput {
-  value?: string;
+  value?: string | boolean;
 }
 
 export interface SmartContractQueryMethodReadSuccess {

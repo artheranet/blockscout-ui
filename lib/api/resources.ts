@@ -1,4 +1,15 @@
-import type { UserInfo, CustomAbis, PublicTags, AddressTags, TransactionTags, ApiKeys, WatchlistAddress } from 'types/api/account';
+import type {
+  UserInfo,
+  CustomAbis,
+  PublicTags,
+  AddressTags,
+  TransactionTags,
+  ApiKeys,
+  WatchlistAddress,
+  VerifiedAddressResponse,
+  TokenInfoApplicationConfig,
+  TokenInfoApplications,
+} from 'types/api/account';
 import type {
   Address,
   AddressCounters,
@@ -36,6 +47,7 @@ import type {
   TokenInventoryResponse,
   TokenInstance,
   TokenInstanceTransfersCount,
+  TokenVerifiedInfo,
 } from 'types/api/token';
 import type { TokensResponse, TokensFilters, TokenInstanceTransferResponse } from 'types/api/tokens';
 import type { TokenTransferResponse, TokenTransferFilters } from 'types/api/tokenTransfer';
@@ -53,6 +65,7 @@ export interface ApiResource {
   endpoint?: string;
   basePath?: string;
   pathParams?: Array<string>;
+  needAuth?: boolean; // for external APIs which require authentication
 }
 
 export const RESOURCES = {
@@ -62,6 +75,9 @@ export const RESOURCES = {
   },
   user_info: {
     path: '/api/account/v1/user/info',
+  },
+  email_resend: {
+    path: '/api/account/v1/email/resend',
   },
   custom_abi: {
     path: '/api/account/v1/user/custom_abis/:id?',
@@ -86,6 +102,39 @@ export const RESOURCES = {
   api_keys: {
     path: '/api/account/v1/user/api_keys/:id?',
     pathParams: [ 'id' as const ],
+  },
+
+  // ACCOUNT: ADDRESS VERIFICATION & TOKEN INFO
+  address_verification: {
+    path: '/api/v1/chains/:chainId/verified-addresses:type',
+    pathParams: [ 'chainId' as const, 'type' as const ],
+    endpoint: appConfig.contractInfoApi.endpoint,
+    basePath: appConfig.contractInfoApi.basePath,
+    needAuth: true,
+  },
+
+  verified_addresses: {
+    path: '/api/v1/chains/:chainId/verified-addresses',
+    pathParams: [ 'chainId' as const ],
+    endpoint: appConfig.contractInfoApi.endpoint,
+    basePath: appConfig.contractInfoApi.basePath,
+    needAuth: true,
+  },
+
+  token_info_applications_config: {
+    path: '/api/v1/chains/:chainId/token-info-submissions/selectors',
+    pathParams: [ 'chainId' as const ],
+    endpoint: appConfig.adminServiceApi.endpoint,
+    basePath: appConfig.adminServiceApi.basePath,
+    needAuth: true,
+  },
+
+  token_info_applications: {
+    path: '/api/v1/chains/:chainId/token-info-submissions/:id?',
+    pathParams: [ 'chainId' as const, 'id' as const ],
+    endpoint: appConfig.adminServiceApi.endpoint,
+    basePath: appConfig.adminServiceApi.basePath,
+    needAuth: true,
   },
 
   // STATS
@@ -116,38 +165,32 @@ export const RESOURCES = {
   // BLOCKS, TXS
   blocks: {
     path: '/api/v2/blocks',
-    paginationFields: [ 'block_number' as const, 'items_count' as const ],
     filterFields: [ 'type' as const ],
   },
   block: {
-    path: '/api/v2/blocks/:height',
-    pathParams: [ 'height' as const ],
+    path: '/api/v2/blocks/:height_or_hash',
+    pathParams: [ 'height_or_hash' as const ],
   },
   block_txs: {
-    path: '/api/v2/blocks/:height/transactions',
-    pathParams: [ 'height' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'index' as const ],
+    path: '/api/v2/blocks/:height_or_hash/transactions',
+    pathParams: [ 'height_or_hash' as const ],
     filterFields: [],
   },
   block_withdrawals: {
-    path: '/api/v2/blocks/:height/withdrawals',
-    pathParams: [ 'height' as const ],
-    paginationFields: [ 'items_count' as const, 'index' as const ],
+    path: '/api/v2/blocks/:height_or_hash/withdrawals',
+    pathParams: [ 'height_or_hash' as const ],
     filterFields: [],
   },
   txs_validated: {
     path: '/api/v2/transactions',
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'filter' as const, 'index' as const ],
     filterFields: [ 'filter' as const, 'type' as const, 'method' as const ],
   },
   txs_pending: {
     path: '/api/v2/transactions',
-    paginationFields: [ 'filter' as const, 'hash' as const, 'inserted_at' as const ],
     filterFields: [ 'filter' as const, 'type' as const, 'method' as const ],
   },
   txs_watchlist: {
     path: '/api/v2/transactions/watchlist',
-    paginationFields: [ 'filter' as const, 'hash' as const, 'inserted_at' as const ],
     filterFields: [ ],
   },
   tx: {
@@ -157,19 +200,16 @@ export const RESOURCES = {
   tx_internal_txs: {
     path: '/api/v2/transactions/:hash/internal-transactions',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'transaction_hash' as const, 'index' as const, 'transaction_index' as const ],
     filterFields: [ ],
   },
   tx_logs: {
     path: '/api/v2/transactions/:hash/logs',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'transaction_hash' as const, 'index' as const ],
     filterFields: [ ],
   },
   tx_token_transfers: {
     path: '/api/v2/transactions/:hash/token-transfers',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'transaction_hash' as const, 'index' as const ],
     filterFields: [ 'type' as const ],
   },
   tx_raw_trace: {
@@ -179,10 +219,10 @@ export const RESOURCES = {
   tx_state_changes: {
     path: '/api/v2/transactions/:hash/state-changes',
     pathParams: [ 'hash' as const ],
+    filterFields: [],
   },
   withdrawals: {
     path: '/api/v2/withdrawals',
-    paginationFields: [ 'index' as const, 'items_count' as const ],
     filterFields: [],
   },
   withdrawals_counters: {
@@ -192,7 +232,6 @@ export const RESOURCES = {
   // ADDRESSES
   addresses: {
     path: '/api/v2/addresses/',
-    paginationFields: [ 'fetched_coin_balance' as const, 'hash' as const, 'items_count' as const ],
     filterFields: [ ],
   },
 
@@ -212,31 +251,26 @@ export const RESOURCES = {
   address_txs: {
     path: '/api/v2/addresses/:hash/transactions',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'index' as const ],
     filterFields: [ 'filter' as const ],
   },
   address_internal_txs: {
     path: '/api/v2/addresses/:hash/internal-transactions',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'index' as const, 'transaction_index' as const ],
     filterFields: [ 'filter' as const ],
   },
   address_token_transfers: {
     path: '/api/v2/addresses/:hash/token-transfers',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'index' as const, 'transaction_index' as const ],
     filterFields: [ 'filter' as const, 'type' as const, 'token' as const ],
   },
   address_blocks_validated: {
     path: '/api/v2/addresses/:hash/blocks-validated',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'block_number' as const ],
     filterFields: [ ],
   },
   address_coin_balance: {
     path: '/api/v2/addresses/:hash/coin-balance-history',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'block_number' as const ],
     filterFields: [ ],
   },
   address_coin_balance_chart: {
@@ -246,19 +280,16 @@ export const RESOURCES = {
   address_logs: {
     path: '/api/v2/addresses/:hash/logs',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'transaction_index' as const, 'index' as const, 'block_number' as const ],
     filterFields: [ ],
   },
   address_tokens: {
     path: '/api/v2/addresses/:hash/tokens',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'token_name' as const, 'token_type' as const, 'value' as const ],
     filterFields: [ 'type' as const ],
   },
   address_withdrawals: {
     path: '/api/v2/addresses/:hash/withdrawals',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'index' as const ],
     filterFields: [],
   },
 
@@ -297,7 +328,6 @@ export const RESOURCES = {
 
   verified_contracts: {
     path: '/api/v2/smart-contracts',
-    paginationFields: [ 'items_count' as const, 'smart_contract_id' as const ],
     filterFields: [ 'q' as const, 'filter' as const ],
   },
   verified_contracts_counters: {
@@ -309,6 +339,12 @@ export const RESOURCES = {
     path: '/api/v2/tokens/:hash',
     pathParams: [ 'hash' as const ],
   },
+  token_verified_info: {
+    path: '/api/v1/chains/:chainId/token-infos/:hash',
+    pathParams: [ 'chainId' as const, 'hash' as const ],
+    endpoint: appConfig.contractInfoApi.endpoint,
+    basePath: appConfig.contractInfoApi.basePath,
+  },
   token_counters: {
     path: '/api/v2/tokens/:hash/counters',
     pathParams: [ 'hash' as const ],
@@ -316,24 +352,20 @@ export const RESOURCES = {
   token_holders: {
     path: '/api/v2/tokens/:hash/holders',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'items_count' as const, 'value' as const ],
     filterFields: [],
   },
   token_transfers: {
     path: '/api/v2/tokens/:hash/transfers',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'index' as const ],
     filterFields: [],
   },
   token_inventory: {
     path: '/api/v2/tokens/:hash/instances',
     pathParams: [ 'hash' as const ],
-    paginationFields: [ 'unique_token' as const ],
     filterFields: [],
   },
   tokens: {
     path: '/api/v2/tokens',
-    paginationFields: [ 'holder_count' as const, 'items_count' as const, 'name' as const ],
     filterFields: [ 'q' as const, 'type' as const ],
   },
 
@@ -349,13 +381,11 @@ export const RESOURCES = {
   token_instance_transfers: {
     path: '/api/v2/tokens/:hash/instances/:id/transfers',
     pathParams: [ 'hash' as const, 'id' as const ],
-    paginationFields: [ 'block_number' as const, 'items_count' as const, 'index' as const, 'token_id' as const ],
     filterFields: [],
   },
   token_instance_holders: {
     path: '/api/v2/tokens/:hash/instances/:id/holders',
     pathParams: [ 'hash' as const, 'id' as const ],
-    paginationFields: [ 'items_count' as const, 'token_id' as const, 'value' as const ],
     filterFields: [],
   },
 
@@ -388,17 +418,6 @@ export const RESOURCES = {
   // SEARCH
   search: {
     path: '/api/v2/search',
-    paginationFields: [
-      'address_hash' as const,
-      'block_hash' as const,
-      'holder_count' as const,
-      'inserted_at' as const,
-      'item_type' as const,
-      'items_count' as const,
-      'name' as const,
-      'q' as const,
-      'tx_hash' as const,
-    ],
     filterFields: [ 'q' ],
   },
   search_check_redirect: {
@@ -413,7 +432,6 @@ export const RESOURCES = {
   // L2
   l2_deposits: {
     path: '/api/v2/optimism/deposits',
-    paginationFields: [ 'nonce' as const, 'items_count' as const ],
     filterFields: [],
   },
 
@@ -423,7 +441,6 @@ export const RESOURCES = {
 
   l2_withdrawals: {
     path: '/api/v2/optimism/withdrawals',
-    paginationFields: [ 'nonce' as const, 'items_count' as const ],
     filterFields: [],
   },
 
@@ -433,7 +450,6 @@ export const RESOURCES = {
 
   l2_output_roots: {
     path: '/api/v2/optimism/output-roots',
-    paginationFields: [ 'index' as const, 'items_count' as const ],
     filterFields: [],
   },
 
@@ -443,7 +459,6 @@ export const RESOURCES = {
 
   l2_txn_batches: {
     path: '/api/v2/optimism/txn-batches',
-    paginationFields: [ 'block_number' as const, 'items_count' as const ],
     filterFields: [],
   },
 
@@ -464,6 +479,9 @@ export const RESOURCES = {
   csv_export_token_transfers: {
     path: '/token-transfers-csv',
   },
+  csv_export_logs: {
+    path: '/logs-csv',
+  },
 };
 
 export type ResourceName = keyof typeof RESOURCES;
@@ -475,10 +493,6 @@ export type ResourcePath = ResourcePathMap[keyof ResourcePathMap]
 
 export type ResourceFiltersKey<R extends ResourceName> = typeof RESOURCES[R] extends {filterFields: Array<unknown>} ?
   ArrayElement<typeof RESOURCES[R]['filterFields']> :
-  never;
-
-export type ResourcePaginationKey<R extends ResourceName> = typeof RESOURCES[R] extends {paginationFields: Array<unknown>} ?
-  ArrayElement<typeof RESOURCES[R]['paginationFields']> :
   never;
 
 export const resourceKey = (x: keyof typeof RESOURCES) => x;
@@ -502,7 +516,7 @@ export type ResourceErrorAccount<T> = ResourceError<{ errors: T }>
 
 export type PaginatedResources = 'blocks' | 'block_txs' |
 'txs_validated' | 'txs_pending' | 'txs_watchlist' |
-'tx_internal_txs' | 'tx_logs' | 'tx_token_transfers' |
+'tx_internal_txs' | 'tx_logs' | 'tx_token_transfers' | 'tx_state_changes' |
 'addresses' |
 'address_txs' | 'address_internal_txs' | 'address_token_transfers' | 'address_blocks_validated' | 'address_coin_balance' |
 'search' |
@@ -524,6 +538,9 @@ Q extends 'private_tags_address' ? AddressTags :
 Q extends 'private_tags_tx' ? TransactionTags :
 Q extends 'api_keys' ? ApiKeys :
 Q extends 'watchlist' ? Array<WatchlistAddress> :
+Q extends 'verified_addresses' ? VerifiedAddressResponse :
+Q extends 'token_info_applications_config' ? TokenInfoApplicationConfig :
+Q extends 'token_info_applications' ? TokenInfoApplications :
 Q extends 'homepage_stats' ? HomeStats :
 Q extends 'homepage_chart_txs' ? ChartTransactionResponse :
 Q extends 'homepage_chart_market' ? ChartMarketResponse :
@@ -561,6 +578,7 @@ Q extends 'address_logs' ? LogsResponseAddress :
 Q extends 'address_tokens' ? AddressTokensResponse :
 Q extends 'address_withdrawals' ? AddressWithdrawalsResponse :
 Q extends 'token' ? TokenInfo :
+Q extends 'token_verified_info' ? TokenVerifiedInfo :
 Q extends 'token_counters' ? TokenCounters :
 Q extends 'token_transfers' ? TokenTransferResponse :
 Q extends 'token_holders' ? TokenHolders :

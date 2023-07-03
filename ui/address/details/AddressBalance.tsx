@@ -14,9 +14,10 @@ import TokenLogo from 'ui/shared/TokenLogo';
 
 interface Props {
   data: Pick<Address, 'block_number_balance_updated_at' | 'coin_balance' | 'hash' | 'exchange_rate'>;
+  isLoading: boolean;
 }
 
-const AddressBalance = ({ data }: Props) => {
+const AddressBalance = ({ data, isLoading }: Props) => {
   const [ lastBlockNumber, setLastBlockNumber ] = React.useState<number>(data.block_number_balance_updated_at || 0);
   const queryClient = useQueryClient();
 
@@ -63,19 +64,26 @@ const AddressBalance = ({ data }: Props) => {
     handler: handleNewCoinBalanceMessage,
   });
 
+  const tokenData = React.useMemo(() => ({
+    address: appConfig.network.currency.address || '',
+    name: appConfig.network.currency.name || '',
+    icon_url: '',
+  }), [ ]);
+
   return (
     <DetailsInfoItem
       title="Balance"
       hint={ `Address balance in ${ appConfig.network.currency.symbol }. Doesn't include ERC20, ERC721 and ERC1155 tokens` }
       flexWrap="nowrap"
       alignItems="flex-start"
+      isLoading={ isLoading }
     >
       <TokenLogo
-        hash={ appConfig.network.currency.address }
-        name={ appConfig.network.currency.name }
+        data={ tokenData }
         boxSize={ 5 }
         mr={ 2 }
         fontSize="sm"
+        isLoading={ isLoading }
       />
       <CurrencyValue
         value={ data.coin_balance || '0' }
@@ -85,6 +93,7 @@ const AddressBalance = ({ data }: Props) => {
         accuracyUsd={ 2 }
         accuracy={ 8 }
         flexWrap="wrap"
+        isLoading={ isLoading }
       />
     </DetailsInfoItem>
   );

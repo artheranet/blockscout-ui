@@ -30,6 +30,7 @@ export const verified: Partial<SmartContract> = {
     { address_hash: '0xa62744BeE8646e237441CDbfdedD3458861748A8', name: 'Sol' },
     { address_hash: '0xa62744BeE8646e237441CDbfdedD3458861748A8', name: 'math' },
   ],
+  language: 'solidity',
 };
 
 export const withMultiplePaths: Partial<SmartContract> = {
@@ -49,6 +50,11 @@ export const verifiedViaSourcify: Partial<SmartContract> = {
   is_fully_verified: false,
   is_partially_verified: true,
   sourcify_repo_url: 'https://repo.sourcify.dev/contracts//full_match/99/0x51891596E158b2857e5356DC847e2D15dFbCF2d0/',
+};
+
+export const verifiedViaEthBytecodeDb: Partial<SmartContract> = {
+  ...verified,
+  is_verified_via_eth_bytecode_db: true,
 };
 
 export const withTwinAddress: Partial<SmartContract> = {

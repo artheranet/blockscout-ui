@@ -6,14 +6,16 @@ import type { VerifiedContractsFilters } from 'types/api/contracts';
 
 import useDebounce from 'lib/hooks/useDebounce';
 import useIsMobile from 'lib/hooks/useIsMobile';
-import useQueryWithPages from 'lib/hooks/useQueryWithPages';
 import { apos } from 'lib/html-entities';
 import getQueryParamString from 'lib/router/getQueryParamString';
+import { VERIFIED_CONTRACT_INFO } from 'stubs/contract';
+import { generateListStub } from 'stubs/utils';
 import ActionBar from 'ui/shared/ActionBar';
 import DataListDisplay from 'ui/shared/DataListDisplay';
 import FilterInput from 'ui/shared/filters/FilterInput';
 import PageTitle from 'ui/shared/Page/PageTitle';
-import Pagination from 'ui/shared/Pagination';
+import Pagination from 'ui/shared/pagination/Pagination';
+import useQueryWithPages from 'ui/shared/pagination/useQueryWithPages';
 import Sort from 'ui/shared/sort/Sort';
 import type { SortField, Sort as TSort } from 'ui/verifiedContracts/utils';
 import { SORT_OPTIONS, sortFn, getNextSortValue } from 'ui/verifiedContracts/utils';
@@ -32,9 +34,21 @@ const VerifiedContracts = () => {
 
   const isMobile = useIsMobile();
 
-  const { isError, isLoading, data, isPaginationVisible, pagination, onFilterChange } = useQueryWithPages({
+  const { isError, isPlaceholderData, data, pagination, onFilterChange } = useQueryWithPages({
     resourceName: 'verified_contracts',
     filters: { q: debouncedSearchTerm, filter: type },
+    options: {
+      placeholderData: generateListStub<'verified_contracts'>(
+        VERIFIED_CONTRACT_INFO,
+        50,
+        {
+          next_page_params: {
+            items_count: '50',
+            smart_contract_id: '50',
+          },
+        },
+      ),
+    },
   });
 
   const handleSearchTermChange = React.useCallback((value: string) => {
@@ -47,14 +61,10 @@ const VerifiedContracts = () => {
       return;
     }
 
-    if ((value === 'vyper' || value === 'solidity')) {
-      onFilterChange({ q: debouncedSearchTerm, filter: value });
-      setType(value);
-      return;
-    }
+    const filter = value === 'all' ? undefined : value as VerifiedContractsFilters['filter'];
 
-    onFilterChange({ q: debouncedSearchTerm, filter: undefined });
-    setType(undefined);
+    onFilterChange({ q: debouncedSearchTerm, filter });
+    setType(filter);
   }, [ debouncedSearchTerm, onFilterChange ]);
 
   const handleSortToggle = React.useCallback((field: SortField) => {
@@ -90,13 +100,13 @@ const VerifiedContracts = () => {
         { sortButton }
         { filterInput }
       </HStack>
-      { (!isMobile || isPaginationVisible) && (
+      { (!isMobile || pagination.isVisible) && (
         <ActionBar mt={ -6 }>
           <HStack spacing={ 3 } display={{ base: 'none', lg: 'flex' }}>
             { typeFilter }
             { filterInput }
           </HStack>
-          { isPaginationVisible && <Pagination ml="auto" { ...pagination }/> }
+          <Pagination ml="auto" { ...pagination }/>
         </ActionBar>
       ) }
     </>
@@ -107,23 +117,21 @@ const VerifiedContracts = () => {
   const content = sortedData ? (
     <>
       <Show below="lg" ssr={ false }>
-        <VerifiedContractsList data={ sortedData }/>
+        <VerifiedContractsList data={ sortedData } isLoading={ isPlaceholderData }/>
       </Show>
       <Hide below="lg" ssr={ false }>
-        <VerifiedContractsTable data={ sortedData } sort={ sort } onSortToggle={ handleSortToggle }/>
+        <VerifiedContractsTable data={ sortedData } sort={ sort } onSortToggle={ handleSortToggle } isLoading={ isPlaceholderData }/>
       </Hide>
     </>
   ) : null;
 
   return (
     <Box>
-      <PageTitle text="Verified contracts" withTextAd/>
+      <PageTitle title="Verified contracts" withTextAd/>
       <VerifiedContractsCounters/>
       <DataListDisplay
         isError={ isError }
-        isLoading={ isLoading }
         items={ data?.items }
-        skeletonProps={{ skeletonDesktopColumns: [ '50%', '130px', '130px', '50%', '80px', '110px' ] }}
         emptyText="There are no verified contracts."
         filterProps={{
           emptyFilteredText: `Couldn${ apos }t find any contract that matches your query.`,

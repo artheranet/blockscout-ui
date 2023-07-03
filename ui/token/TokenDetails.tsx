@@ -1,5 +1,6 @@
 import { Box, Flex, Grid, Link, Skeleton } from '@chakra-ui/react';
 import type { UseQueryResult } from '@tanstack/react-query';
+import BigNumber from 'bignumber.js';
 import { useRouter } from 'next/router';
 import React, { useCallback } from 'react';
 import { scroller } from 'react-scroll';
@@ -49,8 +50,14 @@ const TokenDetails = ({ tokenQuery }: Props) => {
 
     const tab: TokenTabs = item === 'token_holders_count' ? 'holders' : 'token_transfers';
 
-    return <Link onClick={ changeUrlAndScroll(tab) }>{ Number(itemValue).toLocaleString() }</Link>;
-  }, [ tokenCountersQuery.data, changeUrlAndScroll ]);
+    return (
+      <Skeleton isLoaded={ !tokenCountersQuery.isPlaceholderData }>
+        <Link onClick={ changeUrlAndScroll(tab) }>
+          { Number(itemValue).toLocaleString() }
+        </Link>
+      </Skeleton>
+    );
+  }, [ tokenCountersQuery.data, tokenCountersQuery.isPlaceholderData, changeUrlAndScroll ]);
 
   if (tokenQuery.isError) {
     throw Error('Token fetch error', { cause: tokenQuery.error as unknown as Error });
@@ -59,17 +66,16 @@ const TokenDetails = ({ tokenQuery }: Props) => {
   const {
     exchange_rate: exchangeRate,
     total_supply: totalSupply,
+    circulating_market_cap: marketCap,
     decimals,
     symbol,
     type,
   } = tokenQuery.data || {};
 
-  let marketcap;
   let totalSupplyValue;
 
   if (type === 'ERC-20') {
     const totalValue = totalSupply ? getCurrencyValue({ value: totalSupply, accuracy: 3, accuracyUsd: 2, exchangeRate, decimals }) : undefined;
-    marketcap = totalValue?.usd;
     totalSupplyValue = totalValue?.valueStr;
   } else {
     totalSupplyValue = Number(totalSupply).toLocaleString();
@@ -87,17 +93,23 @@ const TokenDetails = ({ tokenQuery }: Props) => {
           title="Price"
           hint="Price per token on the exchanges"
           alignSelf="center"
+          isLoading={ tokenQuery.isPlaceholderData }
         >
-          { `$${ exchangeRate }` }
+          <Skeleton isLoaded={ !tokenQuery.isPlaceholderData } display="inline-block">
+            <span>{ `$${ exchangeRate }` }</span>
+          </Skeleton>
         </DetailsInfoItem>
       ) }
-      { marketcap && (
+      { marketCap && (
         <DetailsInfoItem
           title="Fully diluted market cap"
           hint="Total supply * Price"
           alignSelf="center"
+          isLoading={ tokenQuery.isPlaceholderData }
         >
-          { `$${ marketcap }` }
+          <Skeleton isLoaded={ !tokenQuery.isPlaceholderData } display="inline-block">
+            <span>{ `$${ BigNumber(marketCap).toFormat() }` }</span>
+          </Skeleton>
         </DetailsInfoItem>
       ) }
       <DetailsInfoItem

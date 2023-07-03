@@ -1,10 +1,13 @@
 import { chakra, Text, Flex, useColorModeValue, Icon, Box } from '@chakra-ui/react';
+import type { LinkProps as NextLinkProps } from 'next/link';
+import NextLink from 'next/link';
 import { route } from 'nextjs-routes';
 import React from 'react';
 
 import type { SearchResultItem } from 'types/api/search';
 
 import blockIcon from 'icons/block.svg';
+import labelIcon from 'icons/publictags.svg';
 import txIcon from 'icons/transactions.svg';
 import highlightText from 'lib/highlightText';
 import AddressIcon from 'ui/shared/address/AddressIcon';
@@ -15,9 +18,10 @@ interface Props {
   data: SearchResultItem;
   isMobile: boolean | undefined;
   searchTerm: string;
+  onClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const SearchBarSuggestItem = ({ data, isMobile, searchTerm }: Props) => {
+const SearchBarSuggestItem = ({ data, isMobile, searchTerm, onClick }: Props) => {
 
   const url = (() => {
     switch (data.type) {
@@ -25,14 +29,15 @@ const SearchBarSuggestItem = ({ data, isMobile, searchTerm }: Props) => {
         return route({ pathname: '/token/[hash]', query: { hash: data.address } });
       }
       case 'contract':
-      case 'address': {
+      case 'address':
+      case 'label': {
         return route({ pathname: '/address/[hash]', query: { hash: data.address } });
       }
       case 'transaction': {
         return route({ pathname: '/tx/[hash]', query: { hash: data.tx_hash } });
       }
       case 'block': {
-        return route({ pathname: '/block/[height]', query: { height: String(data.block_number) } });
+        return route({ pathname: '/block/[height_or_hash]', query: { height_or_hash: String(data.block_hash) } });
       }
     }
   })();
@@ -44,7 +49,7 @@ const SearchBarSuggestItem = ({ data, isMobile, searchTerm }: Props) => {
 
         return (
           <>
-            <TokenLogo boxSize={ 6 } hash={ data.address } name={ data.name } flexShrink={ 0 }/>
+            <TokenLogo boxSize={ 6 } data={ data } flexShrink={ 0 }/>
             <Text fontWeight={ 700 } ml={ 2 } w="200px" overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" flexShrink={ 0 }>
               <span dangerouslySetInnerHTML={{ __html: highlightText(name, searchTerm) }}/>
             </Text>
@@ -68,6 +73,21 @@ const SearchBarSuggestItem = ({ data, isMobile, searchTerm }: Props) => {
             { !isMobile && data.name && (
               <Text variant="secondary" ml={ 2 }>
                 <span dangerouslySetInnerHTML={{ __html: shouldHighlightHash ? data.name : highlightText(data.name, searchTerm) }}/>
+              </Text>
+            ) }
+          </>
+        );
+      }
+      case 'label': {
+        return (
+          <>
+            <Icon as={ labelIcon } boxSize={ 6 } mr={ 2 } color="gray.500"/>
+            <Text fontWeight={ 700 } ml={ 2 } w="200px" overflow="hidden" whiteSpace="nowrap" textOverflow="ellipsis" flexShrink={ 0 }>
+              <span dangerouslySetInnerHTML={{ __html: highlightText(data.name, searchTerm) }}/>
+            </Text>
+            { !isMobile && (
+              <Text overflow="hidden" whiteSpace="nowrap" ml={ 2 } variant="secondary">
+                <HashStringShortenDynamic hash={ data.address } isTooltipDisabled/>
               </Text>
             ) }
           </>
@@ -106,7 +126,8 @@ const SearchBarSuggestItem = ({ data, isMobile, searchTerm }: Props) => {
     }
 
     switch (data.type) {
-      case 'token': {
+      case 'token':
+      case 'label': {
         return (
           <Text variant="secondary" whiteSpace="nowrap" overflow="hidden">
             <HashStringShortenDynamic hash={ data.address } isTooltipDisabled/>
@@ -142,31 +163,33 @@ const SearchBarSuggestItem = ({ data, isMobile, searchTerm }: Props) => {
   })();
 
   return (
-    <chakra.a
-      py={ 3 }
-      px={ 1 }
-      display="flex"
-      flexDir="column"
-      rowGap={ 2 }
-      borderColor="divider"
-      borderBottomWidth="1px"
-      _last={{
-        borderBottomWidth: '0',
-      }}
-      _hover={{
-        bgColor: useColorModeValue('blue.50', 'gray.800'),
-      }}
-      fontSize="sm"
-      href={ url }
-      _first={{
-        mt: 2,
-      }}
-    >
-      <Flex display="flex" alignItems="center">
-        { firstRow }
-      </Flex>
-      { secondRow }
-    </chakra.a>
+    <NextLink href={ url as NextLinkProps['href'] } passHref legacyBehavior>
+      <chakra.a
+        py={ 3 }
+        px={ 1 }
+        display="flex"
+        flexDir="column"
+        rowGap={ 2 }
+        borderColor="divider"
+        borderBottomWidth="1px"
+        _last={{
+          borderBottomWidth: '0',
+        }}
+        _hover={{
+          bgColor: useColorModeValue('blue.50', 'gray.800'),
+        }}
+        fontSize="sm"
+        _first={{
+          mt: 2,
+        }}
+        onClick={ onClick }
+      >
+        <Flex display="flex" alignItems="center">
+          { firstRow }
+        </Flex>
+        { secondRow }
+      </chakra.a>
+    </NextLink>
   );
 };
 

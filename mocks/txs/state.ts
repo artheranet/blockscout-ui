@@ -24,6 +24,7 @@ export const mintToken: TxStateChange = {
   is_miner: false,
   token: {
     address: '0x8977EA6C55e878125d1bF3433EBf72138B7a4543',
+    circulating_market_cap: null,
     decimals: null,
     exchange_rate: null,
     holders: '9191',
@@ -31,6 +32,7 @@ export const mintToken: TxStateChange = {
     symbol: 'nMOONBIRD',
     total_supply: '10645',
     type: 'ERC-721',
+    icon_url: null,
   },
   type: 'token',
 };
@@ -59,6 +61,7 @@ export const receiveMintedToken: TxStateChange = {
   is_miner: false,
   token: {
     address: '0x8977EA6C55e878125d1bF3433EBf72138B7a4543',
+    circulating_market_cap: null,
     decimals: null,
     exchange_rate: null,
     holders: '9191',
@@ -66,7 +69,39 @@ export const receiveMintedToken: TxStateChange = {
     symbol: 'nMOONBIRD',
     total_supply: '10645',
     type: 'ERC-721',
+    icon_url: null,
   },
+  type: 'token',
+};
+
+export const transfer1155Token: TxStateChange = {
+  address: {
+    hash: '0x51243E83Db20F8FC2761D894067A2A9eb7B158DE',
+    implementation_name: null,
+    is_contract: false,
+    is_verified: false,
+    name: null,
+    private_tags: [],
+    public_tags: [],
+    watchlist_names: [],
+  },
+  balance_after: '1',
+  balance_before: '0',
+  change: '1',
+  is_miner: false,
+  token: {
+    address: '0x56Cc277717106E528A9FcC2CD342Ff98db758041',
+    circulating_market_cap: null,
+    decimals: null,
+    exchange_rate: null,
+    holders: '50413',
+    icon_url: null,
+    name: null,
+    symbol: null,
+    total_supply: null,
+    type: 'ERC-1155',
+  },
+  token_id: '1',
   type: 'token',
 };
 
@@ -108,9 +143,48 @@ export const sendCoin: TxStateChange = {
   type: 'coin',
 };
 
-export const baseResponse = [
-  mintToken,
-  receiveMintedToken,
-  sendCoin,
-  receiveCoin,
-];
+export const sendERC20Token = {
+  address: {
+    hash: '0x7f6479df95Aa3036a3BE02DB6300ea201ABd9981',
+    implementation_name: null,
+    is_contract: false,
+    is_verified: false,
+    name: null,
+    private_tags: [],
+    public_tags: [],
+    watchlist_names: [],
+  },
+  balance_after: '6814903154',
+  balance_before: '9814903154',
+  change: '-3000000000',
+  is_miner: false,
+  token: {
+    address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    circulating_market_cap: '82978861367.28714',
+    decimals: '6',
+    exchange_rate: '0.992839',
+    holders: null,
+    icon_url: 'https://gateway.tkn.xyz/ipfs/bafybeihrrubjya5nnwgqdm6mfqisxfnv76tl3yd452lkmgomn5n64gzbxu/',
+    name: 'Tether USD',
+    symbol: 'USDT',
+    total_supply: '39030615894320966',
+    type: 'ERC-20',
+    token_id: null,
+  },
+  type: 'token',
+};
+
+export const baseResponse = {
+  items: [
+    mintToken,
+    receiveMintedToken,
+    sendCoin,
+    receiveCoin,
+    transfer1155Token,
+    sendERC20Token,
+  ],
+  next_page_params: {
+    items_count: 50,
+    state_changes: null,
+  },
+};

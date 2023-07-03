@@ -1,8 +1,6 @@
 import { Box, Image, Link, Text, chakra, Skeleton } from '@chakra-ui/react';
 import React, { useEffect } from 'react';
 
-import { useAppContext } from 'lib/appContext';
-import * as cookies from 'lib/cookies';
 import { ndash } from 'lib/html-entities';
 import isBrowser from 'lib/isBrowser';
 
@@ -31,10 +29,8 @@ const CoinzillaTextAd = ({ className }: {className?: string}) => {
   const [ adData, setAdData ] = React.useState<AdData | null>(null);
   const [ isLoading, setIsLoading ] = React.useState(true);
 
-  const hasAdblockCookie = cookies.get(cookies.NAMES.ADBLOCK_DETECTED, useAppContext().cookies);
-
   useEffect(() => {
-    if (!hasAdblockCookie && isBrowser()) {
+    if (isBrowser()) {
       fetch('https://request-global.czilladx.com/serve/native.php?z=19260bf627546ab7242')
         .then(res => res.status === 200 ? res.json() : null)
         .then((_data) => {
@@ -45,17 +41,23 @@ const CoinzillaTextAd = ({ className }: {className?: string}) => {
           }
         })
         .finally(() => {
+          // setAdData(MOCK);
           setIsLoading(false);
         });
     }
-  }, [ hasAdblockCookie ]);
-
-  if (hasAdblockCookie) {
-    return null;
-  }
+  }, [ ]);
 
   if (isLoading) {
-    return <Skeleton className={ className } h={{ base: 12, lg: 6 }} maxW="1000px"/>;
+    return (
+      <Skeleton
+        className={ className }
+        h={{ base: 12, lg: 6 }}
+        w="100%"
+        flexGrow={ 1 }
+        maxW="800px"
+        display="block"
+      />
+    );
   }
 
   if (!adData) {

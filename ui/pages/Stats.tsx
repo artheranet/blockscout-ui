@@ -12,21 +12,21 @@ import useStats from '../stats/useStats';
 
 const Stats = () => {
   const {
-    isLoading,
+    isPlaceholderData,
     isError,
     sections,
     currentSection,
     handleSectionChange,
     interval,
     handleIntervalChange,
-    debounceFilterCharts,
+    handleFilterChange,
     displayedCharts,
     filterQuery,
   } = useStats();
 
   return (
     <Page>
-      <PageTitle text={ `${ appConfig.network.name } stats` }/>
+      <PageTitle title={ `${ appConfig.network.name } stats` }/>
 
       <Box mb={{ base: 6, sm: 8 }}>
         <NumberWidgetsList/>
@@ -39,14 +39,14 @@ const Stats = () => {
           onSectionChange={ handleSectionChange }
           interval={ interval }
           onIntervalChange={ handleIntervalChange }
-          onFilterInputChange={ debounceFilterCharts }
+          onFilterInputChange={ handleFilterChange }
         />
       </Box>
 
       <ChartsWidgetsList
         filterQuery={ filterQuery }
         isError={ isError }
-        isLoading={ isLoading }
+        isPlaceholderData={ isPlaceholderData }
         charts={ displayedCharts }
         interval={ interval }
       />

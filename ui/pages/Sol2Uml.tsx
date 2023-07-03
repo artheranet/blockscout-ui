@@ -2,7 +2,7 @@ import { Flex } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react';
 
-import { useAppContext } from 'lib/appContext';
+import { useAppContext } from 'lib/contexts/app';
 import useIsMobile from 'lib/hooks/useIsMobile';
 import Address from 'ui/shared/address/Address';
 import AddressIcon from 'ui/shared/address/AddressIcon';
@@ -17,14 +17,25 @@ const Sol2Uml = () => {
   const appProps = useAppContext();
 
   const addressHash = router.query.address?.toString() || '';
-  const hasGoBackLink = appProps.referrer && appProps.referrer.includes('/address');
+
+  const backLink = React.useMemo(() => {
+    const hasGoBackLink = appProps.referrer && appProps.referrer.includes('/address');
+
+    if (!hasGoBackLink) {
+      return;
+    }
+
+    return {
+      label: 'Back to address',
+      url: appProps.referrer,
+    };
+  }, [ appProps.referrer ]);
 
   return (
     <Page>
       <PageTitle
-        text="Solidity UML diagram"
-        backLinkUrl={ hasGoBackLink ? appProps.referrer : undefined }
-        backLinkLabel="Back to address"
+        title="Solidity UML diagram"
+        backLink={ backLink }
       />
       <Flex mb={ 10 }>
         <span>For contract</span>

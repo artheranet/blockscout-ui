@@ -3,14 +3,13 @@ import React from 'react';
 
 import TokenTransferNft from 'ui/shared/TokenTransfer/TokenTransferNft';
 
-import type { TxStateChangeNftItemFlatten } from './utils';
-
 interface Props {
-  items: Array<TxStateChangeNftItemFlatten>;
+  items: Array<{total: { token_id: string} }>;
   tokenAddress: string;
+  isLoading?: boolean;
 }
 
-const TxStateTokenIdList = ({ items, tokenAddress }: Props) => {
+const TxStateTokenIdList = ({ items, tokenAddress, isLoading }: Props) => {
   const [ isCut, setIsCut ] = useBoolean(true);
 
   return (
@@ -22,6 +21,7 @@ const TxStateTokenIdList = ({ items, tokenAddress }: Props) => {
           id={ item.total.token_id }
           w="auto"
           truncation="constant"
+          isLoading={ isLoading }
         />
       )) }
       { items.length > 3 && (

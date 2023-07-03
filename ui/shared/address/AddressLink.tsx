@@ -18,6 +18,7 @@ type CommonProps = {
   fontWeight?: string;
   alias?: string | null;
   isLoading?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 type AddressTokenTxProps = {
@@ -49,7 +50,7 @@ const AddressLink = (props: Props) => {
   } else if (type === 'token') {
     url = route({ pathname: '/token/[hash]', query: { hash } });
   } else if (type === 'block') {
-    url = route({ pathname: '/block/[height]', query: { height: props.blockHeight } });
+    url = route({ pathname: '/block/[height_or_hash]', query: { height_or_hash: props.blockHeight } });
   } else if (type === 'address_token') {
     url = route({ pathname: '/address/[hash]', query: { hash, tab: 'token_transfers', token: props.tokenHash, scroll_to_tabs: 'true' } });
   } else {
@@ -105,6 +106,7 @@ const AddressLink = (props: Props) => {
       target={ target }
       overflow="hidden"
       whiteSpace="nowrap"
+      onClick={ props.onClick }
     >
       { content }
     </LinkInternal>

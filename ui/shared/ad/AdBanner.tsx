@@ -2,28 +2,37 @@ import { chakra, Skeleton } from '@chakra-ui/react';
 import React from 'react';
 
 import appConfig from 'configs/app/config';
-import { useAppContext } from 'lib/appContext';
+import { useAppContext } from 'lib/contexts/app';
 import * as cookies from 'lib/cookies';
-import isSelfHosted from 'lib/isSelfHosted';
 
 import AdbutlerBanner from './AdbutlerBanner';
 import CoinzillaBanner from './CoinzillaBanner';
+import SliseBanner from './SliseBanner';
 
 const AdBanner = ({ className, isLoading }: { className?: string; isLoading?: boolean }) => {
   const hasAdblockCookie = cookies.get(cookies.NAMES.ADBLOCK_DETECTED, useAppContext().cookies);
 
-  if (!isSelfHosted() || hasAdblockCookie) {
+  if (appConfig.ad.adBannerProvider === 'none' || hasAdblockCookie) {
     return null;
   }
 
-  const content = appConfig.ad.adButlerOn ? <AdbutlerBanner/> : <CoinzillaBanner/>;
+  const content = (() => {
+    switch (appConfig.ad.adBannerProvider) {
+      case 'adbutler':
+        return <AdbutlerBanner/>;
+      case 'coinzilla':
+        return <CoinzillaBanner/>;
+      case 'slise':
+        return <SliseBanner/>;
+    }
+  })();
 
   return (
     <Skeleton
       className={ className }
       isLoaded={ !isLoading }
       borderRadius="none"
-      maxW={ appConfig.ad.adButlerOn ? '760px' : '728px' }
+      maxW={ appConfig.ad.adBannerProvider === 'adbutler' ? appConfig.ad.adButlerConfigDesktop?.width : '728px' }
       w="100%"
     >
       { content }

@@ -5,12 +5,11 @@ import useFetchProfileInfo from 'lib/hooks/useFetchProfileInfo';
 import useRedirectForInvalidAuthToken from 'lib/hooks/useRedirectForInvalidAuthToken';
 import ContentLoader from 'ui/shared/ContentLoader';
 import DataFetchAlert from 'ui/shared/DataFetchAlert';
-import Page from 'ui/shared/Page/Page';
 import PageTitle from 'ui/shared/Page/PageTitle';
 import UserAvatar from 'ui/shared/UserAvatar';
 
 const MyProfile = () => {
-  const { data, isLoading, isError, isFetched } = useFetchProfileInfo();
+  const { data, isLoading, isError, error } = useFetchProfileInfo();
   useRedirectForInvalidAuthToken();
 
   const content = (() => {
@@ -19,12 +18,15 @@ const MyProfile = () => {
     }
 
     if (isError) {
+      if (error.status === 403) {
+        throw new Error('Unverified email error', { cause: error });
+      }
       return <DataFetchAlert/>;
     }
 
     return (
       <VStack maxW="412px" mt={ 8 } gap={ 5 } alignItems="stretch">
-        <UserAvatar size={ 64 } data={ data } isFetched={ isFetched }/>
+        <UserAvatar size={ 64 }/>
         <FormControl variant="floating" id="name" isRequired size="lg">
           <Input
             required
@@ -54,10 +56,10 @@ const MyProfile = () => {
   })();
 
   return (
-    <Page>
-      <PageTitle text="My profile"/>
+    <>
+      <PageTitle title="My profile"/>
       { content }
-    </Page>
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ export type HomeStats = {
   transactions_today: string;
   gas_used_today: string;
   gas_prices: GasPrices | null;
-  static_gas_price: string;
+  static_gas_price: string | null;
   market_cap: string;
   network_utilization_percentage: number;
 }
@@ -23,7 +23,7 @@ export type Counters = {
   counters: Array<Counter>;
 }
 
-type Counter = {
+export type Counter = {
   id: string;
   value: string;
   title: string;

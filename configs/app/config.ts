@@ -1,4 +1,7 @@
 /* eslint-disable no-restricted-properties */
+import type { AdButlerConfig } from 'types/client/adButlerConfig';
+import type { AdBannerProviders, AdTextProviders } from 'types/client/adProviders';
+import type { NavItemExternal } from 'types/client/navigation-items';
 import type { WalletType } from 'types/client/wallets';
 import type { NetworkExplorer } from 'types/networks';
 import type { ChainIndicatorId } from 'ui/home/indicators/types';
@@ -11,6 +14,7 @@ const parseEnvJson = <DataType>(env: string | undefined): DataType | null => {
     return null;
   }
 };
+
 const stripTrailingSlash = (str: string) => str[str.length - 1] === '/' ? str.slice(0, -1) : str;
 const getWeb3DefaultWallet = (): WalletType => {
   const envValue = getEnvValue(process.env.NEXT_PUBLIC_WEB3_DEFAULT_WALLET);
@@ -20,6 +24,20 @@ const getWeb3DefaultWallet = (): WalletType => {
   ];
 
   return (envValue && SUPPORTED_WALLETS.includes(envValue) ? envValue : 'metamask') as WalletType;
+};
+
+const getAdBannerProvider = (): AdBannerProviders => {
+  const envValue = getEnvValue(process.env.NEXT_PUBLIC_AD_BANNER_PROVIDER);
+  const SUPPORTED_AD_BANNER_PROVIDERS: Array<AdBannerProviders> = [ 'slise', 'adbutler', 'coinzilla', 'none' ];
+
+  return (envValue && SUPPORTED_AD_BANNER_PROVIDERS.includes(envValue) ? envValue : 'slise') as AdBannerProviders;
+};
+
+const getAdTextProvider = (): AdTextProviders => {
+  const envValue = getEnvValue(process.env.NEXT_PUBLIC_AD_TEXT_PROVIDER);
+  const SUPPORTED_AD_BANNER_PROVIDERS: Array<AdTextProviders> = [ 'coinzilla', 'none' ];
+
+  return (envValue && SUPPORTED_AD_BANNER_PROVIDERS.includes(envValue) ? envValue : 'slise') as AdTextProviders;
 };
 
 const env = process.env.NODE_ENV;
@@ -94,14 +112,12 @@ const config = Object.freeze({
     rpcUrl: getEnvValue(process.env.NEXT_PUBLIC_NETWORK_RPC_URL),
     isTestnet: getEnvValue(process.env.NEXT_PUBLIC_IS_TESTNET) === 'true',
   },
-  footerLinks: {
-    github: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_GITHUB_LINK),
-    twitter: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_TWITTER_LINK),
-    telegram: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_TELEGRAM_LINK),
-    staking: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_STAKING_LINK),
-  },
+  otherLinks: parseEnvJson<Array<NavItemExternal>>(getEnvValue(process.env.NEXT_PUBLIC_OTHER_LINKS)) || [],
   featuredNetworks: getEnvValue(process.env.NEXT_PUBLIC_FEATURED_NETWORKS),
+  footerLinks: getEnvValue(process.env.NEXT_PUBLIC_FOOTER_LINKS),
   blockScoutVersion: getEnvValue(process.env.NEXT_PUBLIC_BLOCKSCOUT_VERSION),
+  frontendVersion: getEnvValue(process.env.NEXT_PUBLIC_GIT_TAG),
+  frontendCommit: getEnvValue(process.env.NEXT_PUBLIC_GIT_COMMIT_SHA),
   isAccountSupported: getEnvValue(process.env.NEXT_PUBLIC_IS_ACCOUNT_SUPPORTED) === 'true',
   marketplaceConfigUrl: getEnvValue(process.env.NEXT_PUBLIC_MARKETPLACE_CONFIG_URL),
   marketplaceSubmitForm: getEnvValue(process.env.NEXT_PUBLIC_MARKETPLACE_SUBMIT_FORM),
@@ -112,8 +128,10 @@ const config = Object.freeze({
   authUrl,
   logoutUrl,
   ad: {
-    domainWithAd: getEnvValue(process.env.NEXT_PUBLIC_AD_DOMAIN_WITH_AD) || 'blockscout.com',
-    adButlerOn: getEnvValue(process.env.NEXT_PUBLIC_AD_ADBUTLER_ON) === 'true',
+    adBannerProvider: getAdBannerProvider(),
+    adTextProvider: getAdTextProvider(),
+    adButlerConfigDesktop: parseEnvJson<AdButlerConfig>(getEnvValue(process.env.NEXT_PUBLIC_AD_ADBUTLER_CONFIG_DESKTOP)),
+    adButlerConfigMobile: parseEnvJson<AdButlerConfig>(getEnvValue(process.env.NEXT_PUBLIC_AD_ADBUTLER_CONFIG_MOBILE)),
   },
   web3: {
     defaultWallet: getWeb3DefaultWallet(),
@@ -141,11 +159,19 @@ const config = Object.freeze({
     endpoint: getEnvValue(process.env.NEXT_PUBLIC_VISUALIZE_API_HOST),
     basePath: '',
   },
+  contractInfoApi: {
+    endpoint: getEnvValue(process.env.NEXT_PUBLIC_CONTRACT_INFO_API_HOST),
+    basePath: '',
+  },
+  adminServiceApi: {
+    endpoint: getEnvValue(process.env.NEXT_PUBLIC_ADMIN_SERVICE_API_HOST),
+    basePath: '',
+  },
   homepage: {
     charts: parseEnvJson<Array<ChainIndicatorId>>(getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_CHARTS)) || [],
     plate: {
-      gradient: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_PLATE_GRADIENT) ||
-        'radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%)',
+      background: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_PLATE_BACKGROUND) ||
+        'radial-gradient(103.03% 103.03% at 0% 0%, rgba(183, 148, 244, 0.8) 0%, rgba(0, 163, 196, 0.8) 100%), var(--chakra-colors-blue-400)',
       textColor: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_PLATE_TEXT_COLOR) || 'white',
     },
     showGasTracker: getEnvValue(process.env.NEXT_PUBLIC_HOMEPAGE_SHOW_GAS_TRACKER) === 'false' ? false : true,
@@ -163,9 +189,13 @@ const config = Object.freeze({
   googleAnalytics: {
     propertyId: getEnvValue(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_PROPERTY_ID),
   },
+  mixpanel: {
+    projectToken: getEnvValue(process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN),
+  },
   graphQL: {
     defaultTxnHash: getEnvValue(process.env.NEXT_PUBLIC_GRAPHIQL_TRANSACTION) || '',
   },
+  hideIndexingAlert: getEnvValue(process.env.NEXT_PUBLIC_HIDE_INDEXING_ALERT),
 });
 
 export default config;

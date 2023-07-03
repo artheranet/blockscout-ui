@@ -1,28 +1,33 @@
-import type { TokenCounters, TokenHolder, TokenHolders, TokenInfo, TokenInstance, TokenInventoryResponse, TokenType } from 'types/api/token';
-import type { TokenTransfer, TokenTransferResponse } from 'types/api/tokenTransfer';
+import type { TokenCounters, TokenHolder, TokenInfo, TokenInstance, TokenType } from 'types/api/token';
+import type { TokenTransfer, TokenTransferPagination, TokenTransferResponse } from 'types/api/tokenTransfer';
 
 import { ADDRESS_PARAMS, ADDRESS_HASH } from './addressParams';
 import { BLOCK_HASH } from './block';
 import { TX_HASH } from './tx';
+import { generateListStub } from './utils';
 
 export const TOKEN_INFO_ERC_20: TokenInfo<'ERC-20'> = {
   address: ADDRESS_HASH,
+  circulating_market_cap: '117629601.61913824',
   decimals: '18',
-  exchange_rate: null,
+  exchange_rate: '0.999997',
   holders: '16026',
   name: 'Stub Token (goerli)',
   symbol: 'STUB',
-  total_supply: '6000000000000000000',
+  total_supply: '60000000000000000000000',
   type: 'ERC-20',
+  icon_url: null,
 };
 
 export const TOKEN_INFO_ERC_721: TokenInfo<'ERC-721'> = {
   ...TOKEN_INFO_ERC_20,
+  circulating_market_cap: null,
   type: 'ERC-721',
 };
 
 export const TOKEN_INFO_ERC_1155: TokenInfo<'ERC-1155'> = {
   ...TOKEN_INFO_ERC_20,
+  circulating_market_cap: null,
   type: 'ERC-1155',
 };
 
@@ -35,8 +40,6 @@ export const TOKEN_HOLDER: TokenHolder = {
   address: ADDRESS_PARAMS,
   value: '1021378038331138520',
 };
-
-export const TOKEN_HOLDERS: TokenHolders = { items: Array(50).fill(TOKEN_HOLDER), next_page_params: null };
 
 export const TOKEN_TRANSFER_ERC_20: TokenTransfer = {
   block_hash: BLOCK_HASH,
@@ -72,14 +75,14 @@ export const TOKEN_TRANSFER_ERC_1155: TokenTransfer = {
   token: TOKEN_INFO_ERC_1155,
 };
 
-export const getTokenTransfersStub = (type?: TokenType): TokenTransferResponse => {
+export const getTokenTransfersStub = (type?: TokenType, pagination: TokenTransferPagination | null = null): TokenTransferResponse => {
   switch (type) {
     case 'ERC-721':
-      return { items: Array(50).fill(TOKEN_TRANSFER_ERC_721), next_page_params: null };
+      return generateListStub<'token_transfers'>(TOKEN_TRANSFER_ERC_721, 50, { next_page_params: pagination });
     case 'ERC-1155':
-      return { items: Array(50).fill(TOKEN_TRANSFER_ERC_1155), next_page_params: null };
+      return generateListStub<'token_transfers'>(TOKEN_TRANSFER_ERC_1155, 50, { next_page_params: pagination });
     default:
-      return { items: Array(50).fill(TOKEN_TRANSFER_ERC_20), next_page_params: null };
+      return generateListStub<'token_transfers'>(TOKEN_TRANSFER_ERC_20, 50, { next_page_params: pagination });
   }
 };
 
@@ -90,7 +93,7 @@ export const TOKEN_INSTANCE: TokenInstance = {
   image_url: 'https://ipfs.vipsland.com/nft/collections/genesis/188882.gif',
   is_unique: true,
   metadata: {
-    attributes: Array(3).fill({ trait_type: 'skin', value: '6' }),
+    attributes: Array(3).fill({ trait_type: 'skin tone', value: 'very light skin tone' }),
     description: '**GENESIS #188882**, **8a77ca1bcaa4036f** :: *844th* generation of *#57806 and #57809* :: **eGenetic Hash Code (eDNA)** = *2822355e953a462d*',
     external_url: 'https://vipsland.com/nft/collections/genesis/188882',
     image: 'https://ipfs.vipsland.com/nft/collections/genesis/188882.gif',
@@ -99,9 +102,4 @@ export const TOKEN_INSTANCE: TokenInstance = {
   owner: ADDRESS_PARAMS,
   token: TOKEN_INFO_ERC_1155,
   holder_address_hash: ADDRESS_HASH,
-};
-
-export const TOKEN_INSTANCES: TokenInventoryResponse = {
-  items: Array(50).fill(TOKEN_INSTANCE),
-  next_page_params: null,
 };

@@ -1,12 +1,16 @@
 import { Popover, PopoverTrigger, PopoverContent, PopoverBody, useDisclosure } from '@chakra-ui/react';
 import _debounce from 'lodash/debounce';
+import { useRouter } from 'next/router';
 import { route } from 'nextjs-routes';
 import type { FormEvent, FocusEvent } from 'react';
 import React from 'react';
 
 import useIsMobile from 'lib/hooks/useIsMobile';
+import * as mixpanel from 'lib/mixpanel/index';
+import { getRecentSearchKeywords, saveToRecentKeywords } from 'lib/recentSearchKeywords';
 
 import SearchBarInput from './SearchBarInput';
+import SearchBarRecentKeywords from './SearchBarRecentKeywords';
 import SearchBarSuggest from './SearchBarSuggest';
 import useSearchQuery from './useSearchQuery';
 
@@ -20,16 +24,25 @@ const SearchBar = ({ isHomepage }: Props) => {
   const menuRef = React.useRef<HTMLDivElement>(null);
   const menuWidth = React.useRef<number>(0);
   const isMobile = useIsMobile();
+  const router = useRouter();
 
-  const { searchTerm, handleSearchTermChange, query } = useSearchQuery();
+  const recentSearchKeywords = getRecentSearchKeywords();
+
+  const { searchTerm, handleSearchTermChange, query, pathname, redirectCheckQuery } = useSearchQuery();
 
   const handleSubmit = React.useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (searchTerm) {
       const url = route({ pathname: '/search-results', query: { q: searchTerm } });
-      window.location.assign(url);
+      mixpanel.logEvent(mixpanel.EventTypes.SEARCH_QUERY, {
+        'Search query': searchTerm,
+        'Source page type': mixpanel.getPageType(pathname),
+        'Result URL': url,
+      });
+      saveToRecentKeywords(searchTerm);
+      router.push({ pathname: '/search-results', query: { q: searchTerm } }, undefined, { shallow: true });
     }
-  }, [ searchTerm ]);
+  }, [ searchTerm, pathname, router ]);
 
   const handleFocus = React.useCallback(() => {
     onOpen();
@@ -52,6 +65,16 @@ const SearchBar = ({ isHomepage }: Props) => {
     handleSearchTermChange('');
     inputRef.current?.querySelector('input')?.focus();
   }, [ handleSearchTermChange ]);
+
+  const handleItemClick = React.useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    mixpanel.logEvent(mixpanel.EventTypes.SEARCH_QUERY, {
+      'Search query': searchTerm,
+      'Source page type': mixpanel.getPageType(pathname),
+      'Result URL': event.currentTarget.href,
+    });
+    saveToRecentKeywords(searchTerm);
+    onClose();
+  }, [ pathname, searchTerm, onClose ]);
 
   const menuPaddingX = isMobile && !isHomepage ? 32 : 0;
   const calculateMenuWidth = React.useCallback(() => {
@@ -76,7 +99,7 @@ const SearchBar = ({ isHomepage }: Props) => {
 
   return (
     <Popover
-      isOpen={ isOpen && searchTerm.trim().length > 0 }
+      isOpen={ isOpen && (searchTerm.trim().length > 0 || recentSearchKeywords.length > 0) }
       autoFocus={ false }
       onClose={ onClose }
       placement="bottom-start"
@@ -97,8 +120,13 @@ const SearchBar = ({ isHomepage }: Props) => {
         />
       </PopoverTrigger>
       <PopoverContent w={ `${ menuWidth.current }px` } maxH={{ base: '300px', lg: '500px' }} overflowY="scroll" ref={ menuRef }>
-        <PopoverBody py={ 6 }>
-          <SearchBarSuggest query={ query } searchTerm={ searchTerm }/>
+        <PopoverBody py={ 6 } sx={ isHomepage ? { mark: { bgColor: 'green.100' } } : {} }>
+          { searchTerm.trim().length === 0 && recentSearchKeywords.length > 0 && (
+            <SearchBarRecentKeywords onClick={ handleSearchTermChange } onClear={ onClose }/>
+          ) }
+          { searchTerm.trim().length > 0 && (
+            <SearchBarSuggest query={ query } redirectCheckQuery={ redirectCheckQuery } searchTerm={ searchTerm } onItemClick={ handleItemClick }/>
+          ) }
         </PopoverBody>
       </PopoverContent>
     </Popover>

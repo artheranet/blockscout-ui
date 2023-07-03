@@ -1,4 +1,3 @@
-import { Box } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React from 'react';
 
@@ -8,12 +7,13 @@ import appConfig from 'configs/app/config';
 import useHasAccount from 'lib/hooks/useHasAccount';
 import useIsMobile from 'lib/hooks/useIsMobile';
 import useNewTxsSocket from 'lib/hooks/useNewTxsSocket';
-import useQueryWithPages from 'lib/hooks/useQueryWithPages';
-import Page from 'ui/shared/Page/Page';
+import { TX } from 'stubs/tx';
+import { generateListStub } from 'stubs/utils';
 import PageTitle from 'ui/shared/Page/PageTitle';
+import Pagination from 'ui/shared/pagination/Pagination';
+import useQueryWithPages from 'ui/shared/pagination/useQueryWithPages';
 import RoutedTabs from 'ui/shared/Tabs/RoutedTabs';
 import TxsContent from 'ui/txs/TxsContent';
-import TxsTabSlot from 'ui/txs/TxsTabSlot';
 import TxsWatchlist from 'ui/txs/TxsWatchlist';
 
 const TAB_LIST_PROPS = {
@@ -31,6 +31,12 @@ const Transactions = () => {
     filters: { filter: router.query.tab === 'pending' ? 'pending' : 'validated' },
     options: {
       enabled: !router.query.tab || router.query.tab === 'validated' || router.query.tab === 'pending',
+      placeholderData: generateListStub<'txs_validated'>(TX, 50, { next_page_params: {
+        block_number: 9005713,
+        index: 5,
+        items_count: 50,
+        filter: 'validated',
+      } }),
     },
   });
 
@@ -38,6 +44,11 @@ const Transactions = () => {
     resourceName: 'txs_watchlist',
     options: {
       enabled: router.query.tab === 'watchlist',
+      placeholderData: generateListStub<'txs_watchlist'>(TX, 50, { next_page_params: {
+        block_number: 9005713,
+        index: 5,
+        items_count: 50,
+      } }),
     },
   });
 
@@ -70,18 +81,20 @@ const Transactions = () => {
     } : undefined,
   ].filter(Boolean);
 
+  const pagination = router.query.tab === 'watchlist' ? txsWatchlistQuery.pagination : txsQuery.pagination;
+
   return (
-    <Page>
-      <Box h="100%">
-        <PageTitle text="Transactions" withTextAd/>
-        <RoutedTabs
-          tabs={ tabs }
-          tabListProps={ isMobile ? undefined : TAB_LIST_PROPS }
-          rightSlot={ <TxsTabSlot pagination={ txsQuery.pagination } isPaginationVisible={ txsQuery.isPaginationVisible && !isMobile }/> }
-          stickyEnabled={ !isMobile }
-        />
-      </Box>
-    </Page>
+    <>
+      <PageTitle title="Transactions" withTextAd/>
+      <RoutedTabs
+        tabs={ tabs }
+        tabListProps={ isMobile ? undefined : TAB_LIST_PROPS }
+        rightSlot={ (
+          pagination.isVisible && !isMobile ? <Pagination my={ 1 } { ...pagination }/> : null
+        ) }
+        stickyEnabled={ !isMobile }
+      />
+    </>
   );
 };
 

@@ -3,13 +3,13 @@ import React from 'react';
 
 import appConfig from 'configs/app/config';
 import { useScrollDirection } from 'lib/contexts/scrollDirection';
+import IndexingAlert from 'ui/home/IndexingAlert';
 import NetworkLogo from 'ui/snippets/networkMenu/NetworkLogo';
 import ProfileMenuDesktop from 'ui/snippets/profileMenu/ProfileMenuDesktop';
 import ProfileMenuMobile from 'ui/snippets/profileMenu/ProfileMenuMobile';
 import SearchBar from 'ui/snippets/searchBar/SearchBar';
 
 import Burger from './Burger';
-import ColorModeToggler from './ColorModeToggler';
 
 type Props = {
   isHomePage?: boolean;
@@ -52,7 +52,7 @@ const Header = ({ isHomePage, renderSearchBar }: Props) => {
         paddingTop={ 9 }
         display={{ base: 'none', lg: 'block' }}
       >
-        {/*<IndexingAlert/>*/}
+        { !appConfig.hideIndexingAlert && <IndexingAlert/> }
         { !isHomePage && (
           <HStack
             as="header"
@@ -65,7 +65,6 @@ const Header = ({ isHomePage, renderSearchBar }: Props) => {
             <Box width="100%">
               { searchBar }
             </Box>
-            <ColorModeToggler/>
             { appConfig.isAccountSupported && <ProfileMenuDesktop/> }
           </HStack>
         ) }

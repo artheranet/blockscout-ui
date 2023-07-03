@@ -1,4 +1,4 @@
-import { Text, Box } from '@chakra-ui/react';
+import { Box, Skeleton } from '@chakra-ui/react';
 import React from 'react';
 
 import type { AddressParam } from 'types/api/addressParams';
@@ -9,7 +9,7 @@ import AddressLink from 'ui/shared/address/AddressLink';
 import CopyToClipboard from 'ui/shared/CopyToClipboard';
 
 interface Props {
-  address: AddressParam;
+  address: Pick<AddressParam, 'hash' | 'is_contract' | 'implementation_name'>;
   subtitle?: string;
   isLoading?: boolean;
 }
@@ -20,9 +20,13 @@ const AddressSnippet = ({ address, subtitle, isLoading }: Props) => {
       <Address>
         <AddressIcon address={ address } isLoading={ isLoading }/>
         <AddressLink type="address" hash={ address.hash } fontWeight="600" ml={ 2 } isLoading={ isLoading }/>
-        <CopyToClipboard text={ address.hash } ml={ 1 } isLoading={ isLoading }/>
+        <CopyToClipboard text={ address.hash } isLoading={ isLoading }/>
       </Address>
-      { subtitle && <Text fontSize="sm" variant="secondary" mt={ 0.5 } ml={ 8 }>{ subtitle }</Text> }
+      { subtitle && (
+        <Skeleton fontSize="sm" color="text_secondary" mt={ 0.5 } ml={ 8 } display="inline-block" isLoaded={ !isLoading }>
+          <span>{ subtitle }</span>
+        </Skeleton>
+      ) }
     </Box>
   );
 };

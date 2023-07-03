@@ -121,20 +121,42 @@ const ContractCode = ({ addressHash, noSocket }: Props) => {
     ));
   })();
 
+  const verificationAlert = (() => {
+    if (data?.is_verified_via_eth_bytecode_db) {
+      return (
+        <Alert status="warning" whiteSpace="pre-wrap" flexWrap="wrap">
+          <span>This contract has been { data.is_partially_verified ? 'partially ' : '' }verified using </span>
+          <LinkExternal
+            href="https://docs.blockscout.com/about/features/ethereum-bytecode-database-microservice"
+            fontSize="md"
+          >
+            Blockscout Bytecode Database
+          </LinkExternal>
+        </Alert>
+      );
+    }
+
+    if (data?.is_verified_via_sourcify) {
+      return (
+        <Alert status="warning" whiteSpace="pre-wrap" flexWrap="wrap">
+          <span>This contract has been { data.is_partially_verified ? 'partially ' : '' }verified via Sourcify. </span>
+          { data.sourcify_repo_url && <LinkExternal href={ data.sourcify_repo_url } fontSize="md">View contract in Sourcify repository</LinkExternal> }
+        </Alert>
+      );
+    }
+
+    return null;
+  })();
+
   return (
     <>
       <Flex flexDir="column" rowGap={ 2 } mb={ 6 } _empty={{ display: 'none' }}>
         { data?.is_verified && (
           <Skeleton isLoaded={ !isPlaceholderData }>
-            <Alert status="success">Contract Source Code Verified (Exact Match)</Alert>
+            <Alert status="success">Contract Source Code Verified ({ data.is_partially_verified ? 'Partial' : 'Exact' } Match)</Alert>
           </Skeleton>
         ) }
-        { data?.is_verified_via_sourcify && (
-          <Alert status="warning" whiteSpace="pre-wrap" flexWrap="wrap">
-            <span>This contract has been { data.is_partially_verified ? 'partially ' : '' }verified via Sourcify. </span>
-            { data.sourcify_repo_url && <LinkExternal href={ data.sourcify_repo_url } fontSize="md">View contract in Sourcify repository</LinkExternal> }
-          </Alert>
-        ) }
+        { verificationAlert }
         { (data?.is_changed_bytecode || isChangedBytecodeSocket) && (
           <Alert status="warning">
             Warning! Contract bytecode has been changed and does not match the verified one. Therefore, interaction with this smart contract may be risky.
@@ -190,21 +212,15 @@ const ContractCode = ({ addressHash, noSocket }: Props) => {
             isLoading={ isPlaceholderData }
           />
         ) }
-        { data?.source_code && (
+        { data?.is_verified && (
           <ContractSourceCode
-            data={ data.source_code }
-            hasSol2Yml={ Boolean(data.can_be_visualized_via_sol2uml) }
             address={ addressHash }
-            isViper={ Boolean(data.is_vyper_contract) }
-            filePath={ data.file_path }
-            additionalSource={ data.additional_sources }
-            remappings={ data.compiler_settings?.remappings }
-            isLoading={ isPlaceholderData }
+            implementationAddress={ addressInfo?.implementation_address ?? undefined }
           />
         ) }
         { data?.compiler_settings ? (
           <RawDataSnippet
-            data={ JSON.stringify(data.compiler_settings) }
+            data={ JSON.stringify(data.compiler_settings, undefined, 4) }
             title="Compiler Settings"
             textareaMaxHeight="200px"
             isLoading={ isPlaceholderData }
@@ -212,7 +228,7 @@ const ContractCode = ({ addressHash, noSocket }: Props) => {
         ) : null }
         { data?.abi && (
           <RawDataSnippet
-            data={ JSON.stringify(data.abi) }
+            data={ JSON.stringify(data.abi, undefined, 4) }
             title="Contract ABI"
             textareaMaxHeight="200px"
             isLoading={ isPlaceholderData }
@@ -222,7 +238,7 @@ const ContractCode = ({ addressHash, noSocket }: Props) => {
           <RawDataSnippet
             data={ data.creation_bytecode }
             title="Contract creation code"
-            rightSlot={ data.is_verified ? null : verificationButton }
+            rightSlot={ data.is_verified || data.is_self_destructed ? null : verificationButton }
             beforeSlot={ data.is_self_destructed ? (
               <Alert status="info" whiteSpace="pre-wrap" mb={ 3 }>
                 Contracts that self destruct in their constructors have no contract code published and cannot be verified.

@@ -1,15 +1,11 @@
-import BigNumber from 'bignumber.js';
-
-import config from 'configs/app/config';
-
 export const getNativeCoinValue = (value: string | Array<unknown>) => {
   const _value = Array.isArray(value) ? value[0] : value;
 
   if (typeof _value !== 'string') {
-    return '0';
+    return BigInt(0);
   }
 
-  return BigNumber(_value).times(10 ** config.network.currency.decimals).toString();
+  return BigInt(Number(_value));
 };
 
 export const addZeroesAllowed = (valueType: string) => {
@@ -17,7 +13,7 @@ export const addZeroesAllowed = (valueType: string) => {
     return false;
   }
 
-  const REGEXP = /u?int(\d+)/i;
+  const REGEXP = /^u?int(\d+)/i;
 
   const match = valueType.match(REGEXP);
   const power = match?.[1];

@@ -4,22 +4,30 @@ import React from 'react';
 import * as profileMock from 'mocks/user/profile';
 import authFixture from 'playwright/fixtures/auth';
 import TestApp from 'playwright/TestApp';
+import * as app from 'playwright/utils/app';
 import buildApiUrl from 'playwright/utils/buildApiUrl';
 
 import ProfileMenuMobile from './ProfileMenuMobile';
 
-test.use({ viewport: devices['iPhone 13 Pro'].viewport });
-
 test('no auth', async({ mount, page }) => {
+  const hooksConfig = {
+    router: {
+      asPath: '/',
+      pathname: '/',
+    },
+  };
   const component = await mount(
     <TestApp>
       <ProfileMenuMobile/>
     </TestApp>,
+    { hooksConfig },
   );
 
   await component.locator('.identicon').click();
-  await expect(page).toHaveScreenshot();
+  expect(page.url()).toBe(`${ app.url }/auth/auth0?path=%2F`);
 });
+
+test.use({ viewport: devices['iPhone 13 Pro'].viewport });
 
 test.describe('auth', () => {
   const extendedTest = test.extend({
@@ -48,9 +56,6 @@ test.describe('auth', () => {
     );
 
     await component.getByAltText(/Profile picture/i).click();
-    await expect(page).toHaveScreenshot();
-
-    await page.locator('div[aria-label="Toggle color mode"]').click();
     await expect(page).toHaveScreenshot();
   });
 });

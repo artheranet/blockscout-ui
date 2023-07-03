@@ -2,9 +2,9 @@ import {
   Box,
   Flex,
   HStack,
-  Icon,
   Text,
   Grid,
+  Skeleton,
 } from '@chakra-ui/react';
 import React from 'react';
 
@@ -14,111 +14,23 @@ import appConfig from 'configs/app/config';
 import rightArrowIcon from 'icons/arrows/east.svg';
 import transactionIcon from 'icons/transactions.svg';
 import getValueWithUnit from 'lib/getValueWithUnit';
-import useIsMobile from 'lib/hooks/useIsMobile';
 import useTimeAgoIncrement from 'lib/hooks/useTimeAgoIncrement';
 import Address from 'ui/shared/address/Address';
 import AddressIcon from 'ui/shared/address/AddressIcon';
 import AddressLink from 'ui/shared/address/AddressLink';
+import Icon from 'ui/shared/chakra/Icon';
 import TxStatus from 'ui/shared/TxStatus';
 import TxAdditionalInfo from 'ui/txs/TxAdditionalInfo';
 import TxType from 'ui/txs/TxType';
 
 type Props = {
   tx: Transaction;
+  isLoading?: boolean;
 }
 
-const LatestTxsItem = ({ tx }: Props) => {
+const LatestTxsItem = ({ tx, isLoading }: Props) => {
   const dataTo = tx.to ? tx.to : tx.created_contract;
   const timeAgo = useTimeAgoIncrement(tx.timestamp || '0', true);
-
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return (
-      <Box
-        width="100%"
-        borderTop="1px solid"
-        borderColor="divider"
-        py={ 4 }
-        _last={{ borderBottom: '1px solid', borderColor: 'divider' }}
-      >
-        <Flex justifyContent="space-between">
-          <HStack>
-            <TxType types={ tx.tx_types }/>
-            <TxStatus status={ tx.status } errorText={ tx.status === 'error' ? tx.result : undefined }/>
-          </HStack>
-          <TxAdditionalInfo tx={ tx } isMobile/>
-        </Flex>
-        <Flex
-          mt={ 2 }
-          alignItems="center"
-          width="100%"
-          justifyContent="space-between"
-          mb={ 6 }
-        >
-          <Flex mr={ 3 }>
-            <Icon
-              as={ transactionIcon }
-              boxSize="30px"
-              mr={ 2 }
-              color="link"
-            />
-            <Address width="100%">
-              <AddressLink
-                hash={ tx.hash }
-                type="transaction"
-                fontWeight="700"
-                truncation="constant"
-              />
-            </Address>
-          </Flex>
-          { tx.timestamp && <Text variant="secondary" fontWeight="400" fontSize="sm">{ timeAgo }</Text> }
-        </Flex>
-        <Flex alignItems="center" mb={ 3 }>
-          <Address>
-            <AddressIcon address={ tx.from }/>
-            <AddressLink
-              type="address"
-              hash={ tx.from.hash }
-              alias={ tx.from.name }
-              fontWeight="500"
-              ml={ 2 }
-              truncation="constant"
-              fontSize="sm"
-            />
-          </Address>
-          <Icon
-            as={ rightArrowIcon }
-            boxSize={ 6 }
-            mx={ 2 }
-            color="gray.500"
-          />
-          { dataTo && (
-            <Address>
-              <AddressIcon address={ dataTo }/>
-              <AddressLink
-                type="address"
-                hash={ dataTo.hash }
-                alias={ dataTo.name }
-                fontWeight="500"
-                ml={ 2 }
-                truncation="constant"
-                fontSize="sm"
-              />
-            </Address>
-          ) }
-        </Flex>
-        <Box mb={ 2 } fontSize="sm">
-          <Text as="span">Value { appConfig.network.currency.symbol } </Text>
-          <Text as="span" variant="secondary">{ getValueWithUnit(tx.value).dp(5).toFormat() }</Text>
-        </Box>
-        <Box fontSize="sm">
-          <Text as="span">Fee { appConfig.network.currency.symbol } </Text>
-          <Text as="span" variant="secondary">{ getValueWithUnit(tx.fee.value).dp(5).toFormat() }</Text>
-        </Box>
-      </Box>
-    );
-  }
 
   return (
     <Box
@@ -128,14 +40,15 @@ const LatestTxsItem = ({ tx }: Props) => {
       borderColor="divider"
       p={ 4 }
       _last={{ borderBottom: '1px solid', borderColor: 'divider' }}
+      display={{ base: 'none', lg: 'block' }}
     >
       <Grid width="100%" gridTemplateColumns="3fr 2fr 150px" gridGap={ 8 }>
         <Flex overflow="hidden" w="100%">
-          <TxAdditionalInfo tx={ tx }/>
+          <TxAdditionalInfo tx={ tx } isLoading={ isLoading }/>
           <Box ml={ 3 } w="calc(100% - 40px)">
             <HStack>
-              <TxType types={ tx.tx_types }/>
-              <TxStatus status={ tx.status } errorText={ tx.status === 'error' ? tx.result : undefined }/>
+              <TxType types={ tx.tx_types } isLoading={ isLoading }/>
+              <TxStatus status={ tx.status } errorText={ tx.status === 'error' ? tx.result : undefined } isLoading={ isLoading }/>
             </HStack>
             <Flex
               mt={ 2 }
@@ -146,16 +59,22 @@ const LatestTxsItem = ({ tx }: Props) => {
                 boxSize="30px"
                 color="link"
                 display="inline"
-                mr={ 2 }
+                isLoading={ isLoading }
+                borderRadius="base"
               />
-              <Address overflow="hidden" w="calc(100% - 130px)" maxW="calc(100% - 130px)" mr={ 2 }>
+              <Address overflow="hidden" w="calc(100% - 130px)" maxW="calc(100% - 130px)" ml={ 2 } mr={ 2 }>
                 <AddressLink
                   hash={ tx.hash }
                   type="transaction"
                   fontWeight="700"
+                  isLoading={ isLoading }
                 />
               </Address>
-              { tx.timestamp && <Text variant="secondary" fontWeight="400" fontSize="sm">{ timeAgo }</Text> }
+              { tx.timestamp && (
+                <Skeleton isLoaded={ !isLoading } color="text_secondary" fontWeight="400" fontSize="sm">
+                  <span>{ timeAgo }</span>
+                </Skeleton>
+              ) }
             </Flex>
           </Box>
         </Flex>
@@ -165,10 +84,11 @@ const LatestTxsItem = ({ tx }: Props) => {
             boxSize={ 6 }
             color="gray.500"
             transform="rotate(90deg)"
+            isLoading={ isLoading }
           />
           <Box overflow="hidden" ml={ 1 }>
             <Address mb={ 2 }>
-              <AddressIcon address={ tx.from }/>
+              <AddressIcon address={ tx.from } isLoading={ isLoading }/>
               <AddressLink
                 type="address"
                 hash={ tx.from.hash }
@@ -176,11 +96,12 @@ const LatestTxsItem = ({ tx }: Props) => {
                 fontWeight="500"
                 ml={ 2 }
                 fontSize="sm"
+                isLoading={ isLoading }
               />
             </Address>
             { dataTo && (
               <Address>
-                <AddressIcon address={ dataTo }/>
+                <AddressIcon address={ dataTo } isLoading={ isLoading }/>
                 <AddressLink
                   type="address"
                   hash={ dataTo.hash }
@@ -188,20 +109,21 @@ const LatestTxsItem = ({ tx }: Props) => {
                   fontWeight="500"
                   ml={ 2 }
                   fontSize="sm"
+                  isLoading={ isLoading }
                 />
               </Address>
             ) }
           </Box>
         </Grid>
         <Box>
-          <Box mb={ 2 }>
+          <Skeleton isLoaded={ !isLoading } mb={ 2 }>
             <Text as="span" whiteSpace="pre">{ appConfig.network.currency.symbol } </Text>
             <Text as="span" variant="secondary">{ getValueWithUnit(tx.value).dp(5).toFormat() }</Text>
-          </Box>
-          <Box>
+          </Skeleton>
+          <Skeleton isLoaded={ !isLoading }>
             <Text as="span">Fee </Text>
             <Text as="span" variant="secondary">{ getValueWithUnit(tx.fee.value).dp(5).toFormat() }</Text>
-          </Box>
+          </Skeleton>
         </Box>
       </Grid>
     </Box>

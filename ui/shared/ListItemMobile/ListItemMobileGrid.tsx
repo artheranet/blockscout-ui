@@ -1,4 +1,4 @@
-import { Grid, chakra, GridItem } from '@chakra-ui/react';
+import { Grid, chakra, GridItem, Skeleton } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import React from 'react';
 
@@ -20,7 +20,7 @@ const Container = chakra(({ isAnimated, children, className }: ContainerProps) =
       rowGap={ 2 }
       columnGap={ 2 }
       gridTemplateColumns="86px auto"
-      gridTemplateRows="minmax(30px, max-content)"
+      alignItems="start"
       paddingY={ 4 }
       borderColor="divider"
       borderTopWidth="1px"
@@ -29,6 +29,7 @@ const Container = chakra(({ isAnimated, children, className }: ContainerProps) =
       }}
       className={ className }
       fontSize="sm"
+      lineHeight="20px"
     >
       { children }
     </Grid>
@@ -38,13 +39,20 @@ const Container = chakra(({ isAnimated, children, className }: ContainerProps) =
 interface LabelProps {
   className?: string;
   children: React.ReactNode;
+  isLoading?: boolean;
 }
 
-const Label = chakra(({ children, className }: LabelProps) => {
+const Label = chakra(({ children, className, isLoading }: LabelProps) => {
   return (
-    <GridItem className={ className } fontWeight={ 500 } lineHeight="20px" py="5px">
+    <Skeleton
+      className={ className }
+      isLoaded={ !isLoading }
+      fontWeight={ 500 }
+      my="5px"
+      justifySelf="start"
+    >
       { children }
-    </GridItem>
+    </Skeleton>
   );
 });
 

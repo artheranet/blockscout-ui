@@ -3,12 +3,12 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import React from 'react';
 
 import type { AddressCoinBalanceHistoryResponse } from 'types/api/address';
+import type { PaginationParams } from 'ui/shared/pagination/types';
 
 import appConfig from 'configs/app/config';
 import ActionBar from 'ui/shared/ActionBar';
 import DataListDisplay from 'ui/shared/DataListDisplay';
-import type { Props as PaginationProps } from 'ui/shared/Pagination';
-import Pagination from 'ui/shared/Pagination';
+import Pagination from 'ui/shared/pagination/Pagination';
 import { default as Thead } from 'ui/shared/TheadSticky';
 
 import AddressCoinBalanceListItem from './AddressCoinBalanceListItem';
@@ -16,8 +16,7 @@ import AddressCoinBalanceTableItem from './AddressCoinBalanceTableItem';
 
 interface Props {
   query: UseQueryResult<AddressCoinBalanceHistoryResponse> & {
-    pagination: PaginationProps;
-    isPaginationVisible: boolean;
+    pagination: PaginationParams;
   };
 }
 
@@ -27,7 +26,7 @@ const AddressCoinBalanceHistory = ({ query }: Props) => {
     <>
       <Hide below="lg" ssr={ false }>
         <Table variant="simple" size="sm">
-          <Thead top={ query.isPaginationVisible ? 80 : 0 }>
+          <Thead top={ query.pagination.isVisible ? 80 : 0 }>
             <Tr>
               <Th width="20%">Block</Th>
               <Th width="20%">Txn</Th>
@@ -37,21 +36,31 @@ const AddressCoinBalanceHistory = ({ query }: Props) => {
             </Tr>
           </Thead>
           <Tbody>
-            { query.data.items.map((item) => (
-              <AddressCoinBalanceTableItem key={ item.block_number } { ...item } page={ query.pagination.page }/>
+            { query.data.items.map((item, index) => (
+              <AddressCoinBalanceTableItem
+                key={ item.block_number + (query.isPlaceholderData ? String(index) : '') }
+                { ...item }
+                page={ query.pagination.page }
+                isLoading={ query.isPlaceholderData }
+              />
             )) }
           </Tbody>
         </Table>
       </Hide>
       <Show below="lg" ssr={ false }>
-        { query.data.items.map((item) => (
-          <AddressCoinBalanceListItem key={ item.block_number } { ...item } page={ query.pagination.page }/>
+        { query.data.items.map((item, index) => (
+          <AddressCoinBalanceListItem
+            key={ item.block_number + (query.isPlaceholderData ? String(index) : '') }
+            { ...item }
+            page={ query.pagination.page }
+            isLoading={ query.isPlaceholderData }
+          />
         )) }
       </Show>
     </>
   ) : null;
 
-  const actionBar = query.isPaginationVisible ? (
+  const actionBar = query.pagination.isVisible ? (
     <ActionBar mt={ -6 }>
       <Pagination ml="auto" { ...query.pagination }/>
     </ActionBar>
@@ -61,9 +70,7 @@ const AddressCoinBalanceHistory = ({ query }: Props) => {
     <DataListDisplay
       mt={ 8 }
       isError={ query.isError }
-      isLoading={ query.isLoading }
       items={ query.data?.items }
-      skeletonProps={{ skeletonDesktopColumns: [ '25%', '25%', '25%', '25%', '120px' ] }}
       emptyText="There is no coin balance history for this address."
       content={ content }
       actionBar={ actionBar }

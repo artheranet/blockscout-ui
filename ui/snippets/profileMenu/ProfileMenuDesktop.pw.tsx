@@ -4,6 +4,7 @@ import React from 'react';
 import * as profileMock from 'mocks/user/profile';
 import authFixture from 'playwright/fixtures/auth';
 import TestApp from 'playwright/TestApp';
+import * as app from 'playwright/utils/app';
 import buildApiUrl from 'playwright/utils/buildApiUrl';
 
 import ProfileMenuDesktop from './ProfileMenuDesktop';
@@ -23,7 +24,7 @@ test('no auth', async({ mount, page }) => {
   );
 
   await component.locator('.identicon').click();
-  expect(page.url()).toBe('http://localhost:3100/auth/auth0?path=%2F');
+  expect(page.url()).toBe(`${ app.url }/auth/auth0?path=%2F`);
 });
 
 test.describe('auth', () => {
@@ -53,6 +54,6 @@ test.describe('auth', () => {
     );
 
     await component.getByAltText(/Profile picture/i).click();
-    await expect(page).toHaveScreenshot({ clip: { x: 0, y: 0, width: 250, height: 550 } });
+    await expect(page).toHaveScreenshot({ clip: { x: 0, y: 0, width: 250, height: 600 } });
   });
 });

@@ -10,11 +10,13 @@ declare module "nextjs-routes" {
     | StaticRoute<"/account/custom_abi">
     | StaticRoute<"/account/public_tags_request">
     | StaticRoute<"/account/tag_address">
+    | StaticRoute<"/account/verified_addresses">
     | StaticRoute<"/account/watchlist">
     | StaticRoute<"/accounts">
     | DynamicRoute<"/address/[hash]/contract_verification", { "hash": string }>
     | DynamicRoute<"/address/[hash]", { "hash": string }>
     | StaticRoute<"/api/csrf">
+    | StaticRoute<"/api/healthz">
     | StaticRoute<"/api/media-type">
     | StaticRoute<"/api/proxy">
     | StaticRoute<"/api-docs">
@@ -22,10 +24,9 @@ declare module "nextjs-routes" {
     | StaticRoute<"/apps">
     | StaticRoute<"/auth/auth0">
     | StaticRoute<"/auth/profile">
-    | DynamicRoute<"/block/[height]", { "height": string }>
+    | DynamicRoute<"/block/[height_or_hash]", { "height_or_hash": string }>
     | StaticRoute<"/blocks">
     | StaticRoute<"/csv-export">
-    | StaticRoute<"/graph">
     | StaticRoute<"/graphiql">
     | StaticRoute<"/">
     | StaticRoute<"/l2-deposits">

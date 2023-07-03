@@ -1,25 +1,28 @@
-import { Box, Flex, Tag, Tooltip } from '@chakra-ui/react';
+import { Flex, Skeleton, Tooltip } from '@chakra-ui/react';
 import BigNumber from 'bignumber.js';
 import React from 'react';
 
-import type { TxStateChange, TxStateChangeTokenErc1155, TxStateChangeTokenErc1155Single, TxStateChangeTokenErc721 } from 'types/api/txStateChanges';
-import type { ArrayElement } from 'types/utils';
+import type { TxStateChange } from 'types/api/txStateChanges';
 
 import appConfig from 'configs/app/config';
 import { ZERO_ADDRESS } from 'lib/consts';
-import { nbsp } from 'lib/html-entities';
+import { nbsp, space } from 'lib/html-entities';
 import getNetworkValidatorTitle from 'lib/networks/getNetworkValidatorTitle';
 import trimTokenSymbol from 'lib/token/trimTokenSymbol';
 import AddressLink from 'ui/shared/address/AddressLink';
+import Tag from 'ui/shared/chakra/Tag';
+import TokenTransferNft from 'ui/shared/TokenTransfer/TokenTransferNft';
 
 import TxStateTokenIdList from './TxStateTokenIdList';
 
-export function getStateElements(data: TxStateChange) {
+export function getStateElements(data: TxStateChange, isLoading?: boolean) {
   const tag = (() => {
     if (data.is_miner) {
       return (
         <Tooltip label="A block producer who successfully included the block into the blockchain">
-          <Tag textTransform="capitalize" colorScheme="yellow">{ getNetworkValidatorTitle() }</Tag>
+          <Tag textTransform="capitalize" colorScheme="yellow" isLoading={ isLoading }>
+            { getNetworkValidatorTitle() }
+          </Tag>
         </Tooltip>
       );
     }
@@ -37,7 +40,7 @@ export function getStateElements(data: TxStateChange) {
         const text = changeDirection === 'from' ? 'Mint' : 'Burn';
         return (
           <Tooltip label="Address used in tokens mintings and burnings">
-            <Tag textTransform="capitalize" colorScheme="yellow">{ text } address</Tag>
+            <Tag textTransform="capitalize" colorScheme="yellow" isLoading={ isLoading }>{ text } address</Tag>
           </Tooltip>
         );
       }
@@ -55,48 +58,81 @@ export function getStateElements(data: TxStateChange) {
       const changeSign = beforeBn.lte(afterBn) ? '+' : '-';
 
       return {
-        before: <Box>{ beforeBn.toFormat() } { appConfig.network.currency.symbol }</Box>,
-        after: <Box>{ afterBn.toFormat() } { appConfig.network.currency.symbol }</Box>,
-        change: <Box color={ changeColor }>{ changeSign }{ nbsp }{ differenceBn.abs().toFormat() }</Box>,
+        before: <Skeleton isLoaded={ !isLoading } display="inline-block">{ beforeBn.toFormat() } { appConfig.network.currency.symbol }</Skeleton>,
+        after: <Skeleton isLoaded={ !isLoading } display="inline-block">{ afterBn.toFormat() } { appConfig.network.currency.symbol }</Skeleton>,
+        change: (
+          <Skeleton isLoaded={ !isLoading } display="inline-block" color={ changeColor }>
+            <span>{ changeSign }{ nbsp }{ differenceBn.abs().toFormat() }</span>
+          </Skeleton>
+        ),
         tag,
       };
     }
     case 'token': {
-      const tokenLink = <AddressLink type="token" hash={ data.token.address } alias={ trimTokenSymbol(data.token?.symbol || data.token.address) }/>;
-      const before = Number(data.balance_before);
-      const after = Number(data.balance_after);
+      const tokenLink = (
+        <AddressLink
+          type="token"
+          hash={ data.token.address }
+          alias={ trimTokenSymbol(data.token?.symbol || data.token.address) }
+          isLoading={ isLoading }
+        />
+      );
+      const beforeBn = BigNumber(data.balance_before || '0').div(BigNumber(10 ** (Number(data.token.decimals))));
+      const afterBn = BigNumber(data.balance_after || '0').div(BigNumber(10 ** (Number(data.token.decimals))));
       const change = (() => {
-        const difference = typeof data.change === 'string' ? Number(data.change) : after - before;
+        let differenceBn;
+        if (typeof data.change === 'string') {
+          differenceBn = BigNumber(data.change || '0').div(BigNumber(10 ** (Number(data.token.decimals))));
+        } else {
+          differenceBn = afterBn.minus(beforeBn);
+        }
 
-        if (!difference) {
+        if (!differenceBn || differenceBn.isEqualTo(0)) {
           return null;
         }
 
-        const changeColor = difference >= 0 ? 'green.500' : 'red.500';
-        const changeSign = difference >= 0 ? '+' : '-';
+        const changeColor = differenceBn.isGreaterThanOrEqualTo(0) ? 'green.500' : 'red.500';
+        const changeSign = differenceBn.isGreaterThanOrEqualTo(0) ? '+' : '-';
 
-        return <Box color={ changeColor }>{ changeSign }{ nbsp }{ Math.abs(difference).toLocaleString() }</Box>;
+        return (
+          <Skeleton isLoaded={ !isLoading } display="inline-block" color={ changeColor }>
+            <span>{ changeSign }{ nbsp }{ differenceBn.abs().toFormat() }</span>
+          </Skeleton>
+        );
       })();
 
       const tokenId = (() => {
         if (!Array.isArray(data.change)) {
-          return null;
+          if ('token_id' in data && data.token_id) {
+            return (
+              <TokenTransferNft
+                hash={ data.token.address }
+                id={ data.token_id }
+                w="auto"
+                truncation="constant"
+                isLoading={ isLoading }
+              />
+            );
+          } else {
+            return null;
+          }
         }
 
-        const items = (data.change as Array<TxStateChangeNftItem>).reduce(flattenTotal, []);
-        return <TxStateTokenIdList items={ items } tokenAddress={ data.token.address }/>;
+        return <TxStateTokenIdList items={ data.change } tokenAddress={ data.token.address } isLoading={ isLoading }/>;
       })();
 
       return {
         before: data.balance_before ? (
           <Flex whiteSpace="pre-wrap" justifyContent={{ base: 'flex-start', lg: 'flex-end' }}>
-            <span>{ before.toLocaleString() } </span>
+            <Skeleton isLoaded={ !isLoading }>{ beforeBn.toFormat() }</Skeleton>
+            <span>{ space }</span>
             { tokenLink }
           </Flex>
         ) : null,
         after: data.balance_after ? (
           <Flex whiteSpace="pre-wrap" justifyContent={{ base: 'flex-start', lg: 'flex-end' }}>
-            <span>{ after.toLocaleString() } </span>
+            <Skeleton isLoaded={ !isLoading }>{ afterBn.toFormat() }</Skeleton>
+            <span>{ space }</span>
             { tokenLink }
           </Flex>
         ) : null,
@@ -106,17 +142,4 @@ export function getStateElements(data: TxStateChange) {
       };
     }
   }
-}
-
-export type TxStateChangeNftItem = ArrayElement<TxStateChangeTokenErc721['change'] | TxStateChangeTokenErc1155['change']>;
-export type TxStateChangeNftItemFlatten = ArrayElement<TxStateChangeTokenErc721['change'] | TxStateChangeTokenErc1155Single['change']>;
-
-function flattenTotal(result: Array<TxStateChangeNftItemFlatten>, item: TxStateChangeNftItem): Array<TxStateChangeNftItemFlatten> {
-  if (Array.isArray(item.total)) {
-    result.push(...item.total.map((total) => ({ ...item, total })));
-  } else {
-    result.push({ ...item, total: item.total });
-  }
-
-  return result;
 }

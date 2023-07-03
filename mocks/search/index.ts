@@ -1,4 +1,4 @@
-import type { SearchResultToken, SearchResultBlock, SearchResultAddressOrContract, SearchResultTx, SearchResult } from 'types/api/search';
+import type { SearchResultToken, SearchResultBlock, SearchResultAddressOrContract, SearchResultTx, SearchResultLabel, SearchResult } from 'types/api/search';
 
 export const token1: SearchResultToken = {
   address: '0x377c5F2B300B25a534d4639177873b7fEAA56d4B',
@@ -7,6 +7,7 @@ export const token1: SearchResultToken = {
   symbol: 'TNT',
   token_url: '/token/0x377c5F2B300B25a534d4639177873b7fEAA56d4B',
   type: 'token' as const,
+  icon_url: 'http://localhost:3000/token-icon.png',
 };
 
 export const token2: SearchResultToken = {
@@ -16,6 +17,7 @@ export const token2: SearchResultToken = {
   symbol: 'pdE1B',
   token_url: '/token/0xC35Cc7223B0175245E9964f2E3119c261E8e21F9',
   type: 'token' as const,
+  icon_url: null,
 };
 
 export const block1: SearchResultBlock = {
@@ -36,6 +38,13 @@ export const contract1: SearchResultAddressOrContract = {
   address: '0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
   name: 'Unknown contract in this network',
   type: 'contract' as const,
+  url: '/address/0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
+};
+
+export const label1: SearchResultLabel = {
+  address: '0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
+  name: 'utko',
+  type: 'label' as const,
   url: '/address/0xb64a30399f7F6b0C154c2E7Af0a3ec7B0A5b131a',
 };
 
