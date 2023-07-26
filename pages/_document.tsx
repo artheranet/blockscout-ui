@@ -47,11 +47,11 @@ class MyDocument extends Document {
             // eslint-disable-next-line max-len
             content="Arthera blockchain explorer powered by Blockscout."
           />
-          <meta property="og:image" content={ appConfig.baseUrl + '/static/og.png' }/>
+          <meta property="og:image" content={ appConfig.app.baseUrl + '/static/og.png' }/>
           <meta property="og:site_name" content="Blockscout"/>
           <meta property="og:type" content="website"/>
           <meta name="twitter:card" content="summary_large_image"/>
-          <meta property="twitter:image" content={ appConfig.baseUrl + '/static/og_twitter.png' }/>
+          <meta property="twitter:image" content={ appConfig.app.baseUrl + '/static/og_twitter.png' }/>
         </Head>
         <body>
           <ColorModeScript initialColorMode={ theme.config.initialColorMode }/>

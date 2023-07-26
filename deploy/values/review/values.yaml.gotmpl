@@ -5,6 +5,7 @@ frontend:
   enabled: true
   image:
     _default: ghcr.io/blockscout/frontend:prerelease-{{ requiredEnv "GITHUB_REF_NAME_SLUG" }}
+    pullPolicy: Always
   ingress:
     enabled: true
     host:
@@ -56,8 +57,6 @@ frontend:
   nodeSelector:
     enabled: false
   environment:
-    NEXT_PUBLIC_BLOCKSCOUT_VERSION:
-      _default: v5.1.2-beta
     NEXT_PUBLIC_APP_ENV:
       _default: preview
     NEXT_PUBLIC_APP_INSTANCE:
@@ -96,8 +95,6 @@ frontend:
       _default: https://airtable.com/shrqUAcjgGJ4jU88C
     NEXT_PUBLIC_LOGOUT_URL:
       _default: https://blockscoutcom.us.auth0.com/v2/logout
-    NEXT_PUBLIC_LOGOUT_RETURN_URL:
-      _default: blockscout-main.k8s-dev.blockscout.com/auth/logout
     NEXT_PUBLIC_HOMEPAGE_CHARTS:
       _default: "['daily_txs','coin_price','market_cap']"
     NEXT_PUBLIC_APP_HOST:

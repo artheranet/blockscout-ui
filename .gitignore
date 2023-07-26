@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /node_modules_linux
+/**/node_modules
 /.pnp
 .pnp.js
 
@@ -53,3 +54,8 @@ yarn-error.log*
 .yarn/cache
 .yarn/*.gz
 .yarnrc.yml
+
+# tools: envs-validator
+/deploy/tools/envs-validator/index.js
+/deploy/tools/envs-validator/envs.ts
+/deploy/tools/envs-validator/schema.ts

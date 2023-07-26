@@ -134,7 +134,7 @@ export default function useNavItems(): ReturnType {
       appConfig.otherLinks.length > 0 ? {
         text: 'Other',
         icon: gearIcon,
-        subItems: appConfig.otherLinks,
+        subItems: appConfig.navigation.otherLinks,
       } : null,
     ].filter(Boolean);
 
