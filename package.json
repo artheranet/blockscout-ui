@@ -15,7 +15,7 @@
     "dev:goerli": "./node_modules/.bin/dotenv -e ./configs/envs/.env.goerli -e ./configs/envs/.env.common -e ./configs/envs/.env.secrets -- bash -c 'next dev -- -p \"$NEXT_PUBLIC_APP_PORT\"' | ./node_modules/.bin/pino-pretty",
     "dev:goerli:optimism": "./node_modules/.bin/dotenv -e ./configs/envs/.env.goerli.optimism -e ./configs/envs/.env.common -e ./configs/envs/.env.secrets -- bash -c 'next dev -- -p \"$NEXT_PUBLIC_APP_PORT\"' | ./node_modules/.bin/pino-pretty",
     "build": "next build",
-    "build:docker": "docker build --build-arg GIT_COMMIT_SHA=$(git rev-parse HEAD) -t registry.cloud.bigconnect.io/blockscout-ui:main ./",
+    "build:docker": "docker build --build-arg GIT_COMMIT_SHA=$(git rev-parse HEAD) -t arthera/blockscout-ui:latest ./",
     "start": "next start",
     "start:docker:local": "docker run --net=host -p 3000:3000 --env-file .env.local blockscout",
     "start:docker:poa_core": "docker run -p 3000:3000 --env-file ./configs/envs/.env.common --env-file ./configs/envs/.env.poa_core --env-file ./configs/envs/.env.secrets blockscout",
