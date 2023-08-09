@@ -10,7 +10,6 @@ import appsIcon from 'icons/apps.svg';
 import withdrawalsIcon from 'icons/arrows/north-east.svg';
 import depositsIcon from 'icons/arrows/south-east.svg';
 import blocksIcon from 'icons/block.svg';
-import gearIcon from 'icons/gear.svg';
 import globeIcon from 'icons/globe-b.svg';
 import outputRootsIcon from 'icons/output_roots.svg';
 import privateTagIcon from 'icons/privattags.svg';
@@ -40,8 +39,7 @@ export function isInternalItem(item: NavItem): item is NavItemInternal {
 }
 
 export default function useNavItems(): ReturnType {
-  const isMarketplaceAvailable = Boolean(appConfig.marketplaceConfigUrl && appConfig.network.rpcUrl);
-  const hasAPIDocs = appConfig.apiDoc.specUrl;
+  const isMarketplaceAvailable = false;
 
   const router = useRouter();
   const pathname = router.pathname;
@@ -131,11 +129,6 @@ export default function useNavItems(): ReturnType {
         nextRoute: { pathname: '/stats' as const },
         icon: statsIcon,
         isActive: pathname === '/stats',
-      } : null,
-      appConfig.otherLinks.length > 0 ? {
-        text: 'Other',
-        icon: gearIcon,
-        subItems: appConfig.otherLinks,
       } : null,
     ].filter(Boolean);
 
