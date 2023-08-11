@@ -129,7 +129,7 @@ export default function useNavItems(): ReturnType {
         icon: statsIcon,
         isActive: pathname === '/stats',
       } : null,
-      appConfig.navigation.otherLinks.length > 0 ? {
+      config.UI.sidebar.otherLinks.length > 0 ? {
         text: 'Other',
         icon: gearIcon,
         subItems: config.UI.sidebar.otherLinks,

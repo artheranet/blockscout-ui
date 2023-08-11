@@ -13,6 +13,9 @@ import * as metadata from 'lib/metadata';
 import getQueryParamString from 'lib/router/getQueryParamString';
 import ContentLoader from 'ui/shared/ContentLoader';
 
+const feature = config.features.marketplace;
+const configUrl = feature.isEnabled ? feature.configUrl : '';
+
 const IFRAME_SANDBOX_ATTRIBUTE = 'allow-forms allow-orientation-lock ' +
 'allow-pointer-lock allow-popups-to-escape-sandbox ' +
 'allow-same-origin allow-scripts ' +
@@ -30,7 +33,7 @@ const MarketplaceApp = () => {
   const { isLoading, isError, error, data } = useQuery<unknown, ResourceError<unknown>, MarketplaceAppOverview>(
     [ 'marketplace-apps', id ],
     async() => {
-      const result = await apiFetch<Array<MarketplaceAppOverview>, unknown>(config.features.marketplace.configUrl);
+      const result = await apiFetch<Array<MarketplaceAppOverview>, unknown>(configUrl);
       if (!Array.isArray(result)) {
         throw result;
       }
@@ -41,6 +44,9 @@ const MarketplaceApp = () => {
       }
 
       return item;
+    },
+    {
+      enabled: feature.isEnabled,
     },
   );
 
