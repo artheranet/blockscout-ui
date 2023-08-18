@@ -18,13 +18,13 @@ test.beforeEach(async({ page }) => {
     await page.route(textAdMock.duck.ad.thumbnail, (route) => {
         return route.fulfill({
             status: 200,
-            path: './playwright/image_s.jpg',
+            path: './playwright/mocks/image_s.jpg',
         });
     });
     await page.route(searchMock.token1.icon_url as string, (route) => {
         return route.fulfill({
             status: 200,
-            path: './playwright/image_s.jpg',
+            path: './playwright/mocks/image_s.jpg',
         });
     });
 });
@@ -284,47 +284,47 @@ test('recent keywords suggest +@mobile', async({ mount, page }) => {
 });
 
 test.describe('with apps', () => {
-  const MARKETPLACE_CONFIG_URL = 'https://localhost:3000/marketplace-config.json';
+    const MARKETPLACE_CONFIG_URL = 'https://localhost:3000/marketplace-config.json';
 
-  test('default view +@mobile', async({ mount, page }) => {
-    const API_URL = buildApiUrl('search') + '?q=o';
-    await page.route(API_URL, (route) => route.fulfill({
-      status: 200,
-      body: JSON.stringify({
-        items: [
-          searchMock.token1,
-        ],
-        next_page_params: { foo: 'bar' },
-      }),
-    }));
+    test('default view +@mobile', async({ mount, page }) => {
+        const API_URL = buildApiUrl('search') + '?q=o';
+        await page.route(API_URL, (route) => route.fulfill({
+            status: 200,
+            body: JSON.stringify({
+                items: [
+                    searchMock.token1,
+                ],
+                next_page_params: { foo: 'bar' },
+            }),
+        }));
 
-    await page.route(MARKETPLACE_CONFIG_URL, (route) => route.fulfill({
-      status: 200,
-      body: JSON.stringify(appsMock),
-    }));
+        await page.route(MARKETPLACE_CONFIG_URL, (route) => route.fulfill({
+            status: 200,
+            body: JSON.stringify(appsMock),
+        }));
 
-    await page.route(appsMock[0].logo, (route) => {
-      return route.fulfill({
-        status: 200,
-        path: './playwright/image_s.jpg',
-      });
+        await page.route(appsMock[0].logo, (route) => {
+            return route.fulfill({
+                status: 200,
+                path: './playwright/mocks/image_s.jpg',
+            });
+        });
+        await page.route(appsMock[1].logo as string, (route) => {
+            return route.fulfill({
+                status: 200,
+                path: './playwright/mocks/image_s.jpg',
+            });
+        });
+
+        await mount(
+            <TestApp>
+                <SearchBar/>
+            </TestApp>,
+        );
+        await page.getByPlaceholder(/search/i).type('o');
+
+        await page.waitForResponse(API_URL);
+
+        await expect(page).toHaveScreenshot({ clip: { x: 0, y: 0, width: 1200, height: 500 } });
     });
-    await page.route(appsMock[1].logo as string, (route) => {
-      return route.fulfill({
-        status: 200,
-        path: './playwright/image_s.jpg',
-      });
-    });
-
-    await mount(
-      <TestApp>
-        <SearchBar/>
-      </TestApp>,
-    );
-    await page.getByPlaceholder(/search/i).type('o');
-
-    await page.waitForResponse(API_URL);
-
-    await expect(page).toHaveScreenshot({ clip: { x: 0, y: 0, width: 1200, height: 500 } });
-  });
 });
