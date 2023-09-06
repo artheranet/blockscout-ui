@@ -40,7 +40,7 @@ export function isInternalItem(item: NavItem): item is NavItemInternal {
 }
 
 export default function useNavItems(): ReturnType {
-  const isMarketplaceAvailable = Boolean(appConfig.marketplaceConfigUrl && appConfig.network.rpcUrl);
+  const isMarketplaceAvailable = Boolean(appConfig.marketplace.configUrl && appConfig.network.rpcUrl);
 
   const router = useRouter();
   const pathname = router.pathname;
@@ -131,7 +131,7 @@ export default function useNavItems(): ReturnType {
         icon: statsIcon,
         isActive: pathname === '/stats',
       } : null,
-      appConfig.otherLinks.length > 0 ? {
+      appConfig.navigation.otherLinks.length > 0 ? {
         text: 'Other',
         icon: gearIcon,
         subItems: appConfig.navigation.otherLinks,
