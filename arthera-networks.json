@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Testnet",
+    "url": "https://explorer-test.arthera.net/",
+    "group": "Testnets",
+    "icon": "https://docs.arthera.net/assets/files/gradient_icon-9ea5488ba4533ed97dffec61a0ae5a0e.svg",
+    "invertIconInDarkMode": false
+  },
+  {
+    "title": "Devnet",
+    "url": "https://explorer-dev.arthera.net/",
+    "group": "Testnets",
+    "icon": "https://docs.arthera.net/assets/files/gradient_icon-9ea5488ba4533ed97dffec61a0ae5a0e.svg",
+    "invertIconInDarkMode": false
+  }
+]
