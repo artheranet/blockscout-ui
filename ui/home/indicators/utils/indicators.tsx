@@ -7,7 +7,7 @@ import config from 'configs/app';
 import globeIcon from 'icons/globe.svg';
 import txIcon from 'icons/transactions.svg';
 import { sortByDateDesc } from 'ui/shared/chart/utils/sorts';
-import TokenLogo from 'ui/shared/TokenLogo';
+import * as TokenEntity from 'ui/shared/entities/token/TokenEntity';
 
 const dailyTxsIndicator: TChainIndicator<'homepage_chart_txs'> = {
   id: 'daily_txs',
@@ -30,21 +30,23 @@ const dailyTxsIndicator: TChainIndicator<'homepage_chart_txs'> = {
 const nativeTokenData = {
   name: config.chain.currency.name || '',
   icon_url: '',
+  symbol: '',
+  address: '',
 };
 
 const coinPriceIndicator: TChainIndicator<'homepage_chart_market'> = {
   id: 'coin_price',
-  title: `${ config.chain.currency.symbol } price`,
+  title: `${ config.chain.governanceToken.symbol || config.chain.currency.symbol } price`,
   value: (stats) => '$' + Number(stats.coin_price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }),
-  icon: <TokenLogo data={ nativeTokenData } boxSize={ 6 }/>,
-  hint: `${ config.chain.currency.symbol } token daily price in USD.`,
+  icon: <TokenEntity.Icon token={ nativeTokenData } boxSize={ 6 } marginRight={ 0 }/>,
+  hint: `${ config.chain.governanceToken.symbol || config.chain.currency.symbol } token daily price in USD.`,
   api: {
     resourceName: 'homepage_chart_market',
     dataFn: (response) => ([ {
       items: response.chart_data
         .map((item) => ({ date: new Date(item.date), value: Number(item.closing_price) }))
         .sort(sortByDateDesc),
-      name: `${ config.chain.currency.symbol } price`,
+      name: `${ config.chain.governanceToken.symbol || config.chain.currency.symbol } price`,
       valueFormatter: (x: number) => '$' + x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }),
     } ]),
   },
