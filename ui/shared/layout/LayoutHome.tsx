@@ -6,8 +6,8 @@ import IndexingAlertBlocks from 'ui/home/IndexingAlertBlocks';
 import AppErrorBoundary from 'ui/shared/AppError/AppErrorBoundary';
 import Header from 'ui/snippets/header/Header';
 
-import * as Layout from './components';
 import config from '../../../configs/app';
+import * as Layout from './components';
 
 const LayoutHome = ({ children }: Props) => {
   return (
@@ -17,7 +17,7 @@ const LayoutHome = ({ children }: Props) => {
         <Layout.MainColumn
           paddingTop={{ base: '88px', lg: 9 }}
         >
-          {!config.UI.indexingAlert.isHidden && <IndexingAlertBlocks/>}
+          { !config.UI.indexingAlert.isHidden && <IndexingAlertBlocks/> }
           <Header isHomePage/>
           <AppErrorBoundary>
             { children }

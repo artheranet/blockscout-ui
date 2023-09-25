@@ -26,6 +26,7 @@ export interface EntityBaseProps {
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   query?: Record<string, string>;
   tailLength?: number;
+  target?: React.HTMLAttributeAnchorTarget;
   truncation?: Truncation;
 }
 
@@ -35,13 +36,13 @@ export interface ContainerBaseProps extends Pick<EntityBaseProps, 'className'> {
 
 const Container = chakra(({ className, children }: ContainerBaseProps) => {
   return (
-    <Flex
-      className={ className }
-      alignItems="center"
-      minWidth={ 0 } // for content truncation - https://css-tricks.com/flexbox-truncated-text/
-    >
-      { children }
-    </Flex>
+      <Flex
+          className={ className }
+          alignItems="center"
+          minWidth={ 0 } // for content truncation - https://css-tricks.com/flexbox-truncated-text/
+      >
+        { children }
+      </Flex>
   );
 });
 
@@ -63,23 +64,24 @@ const Link = chakra(({ isLoading, children, isExternal, onClick, href, noLink }:
   const Component = isExternal ? LinkExternal : LinkInternal;
 
   return (
-    <Component
-      { ...styles }
-      href={ href }
-      isLoading={ isLoading }
-      onClick={ onClick }
-    >
-      { children }
-    </Component>
+      <Component
+          { ...styles }
+          href={ href }
+          isLoading={ isLoading }
+          onClick={ onClick }
+      >
+        { children }
+      </Component>
   );
 });
 
 export interface IconBaseProps extends Pick<EntityBaseProps, 'isLoading' | 'iconSize' | 'noIcon'> {
   asProp: As;
   color?: IconProps['color'];
+  borderRadius?: IconProps['borderRadius'];
 }
 
-const Icon = ({ isLoading, iconSize, noIcon, asProp, color }: IconBaseProps) => {
+const Icon = ({ isLoading, iconSize, noIcon, asProp, color, borderRadius }: IconBaseProps) => {
   const defaultColor = useColorModeValue('gray.500', 'gray.400');
 
   if (noIcon) {
@@ -88,14 +90,14 @@ const Icon = ({ isLoading, iconSize, noIcon, asProp, color }: IconBaseProps) => 
 
   const styles = getIconProps(iconSize);
   return (
-    <Box mr={ 2 } color={ color ?? defaultColor }>
-      <IconBase
-        as={ asProp }
-        boxSize={ styles.boxSize }
-        isLoading={ isLoading }
-        borderRadius="base"
-      />
-    </Box>
+      <Box mr={ 2 } color={ color ?? defaultColor }>
+        <IconBase
+            as={ asProp }
+            boxSize={ styles.boxSize }
+            isLoading={ isLoading }
+            borderRadius={ borderRadius ?? 'base' }
+        />
+      </Box>
   );
 };
 
@@ -110,18 +112,18 @@ const Content = chakra(({ className, isLoading, asProp, text, truncation = 'dyna
     switch (truncation) {
       case 'constant':
         return (
-          <HashStringShorten
-            hash={ text }
-            as={ asProp }
-          />
+            <HashStringShorten
+                hash={ text }
+                as={ asProp }
+            />
         );
       case 'dynamic':
         return (
-          <HashStringShortenDynamic
-            hash={ text }
-            as={ asProp }
-            tailLength={ tailLength }
-          />
+            <HashStringShortenDynamic
+                hash={ text }
+                as={ asProp }
+                tailLength={ tailLength }
+            />
         );
       case 'none':
         return <chakra.span as={ asProp }>{ text }</chakra.span>;
@@ -129,14 +131,14 @@ const Content = chakra(({ className, isLoading, asProp, text, truncation = 'dyna
   })();
 
   return (
-    <Skeleton
-      className={ className }
-      isLoaded={ !isLoading }
-      overflow="hidden"
-      whiteSpace="nowrap"
-    >
-      { children }
-    </Skeleton>
+      <Skeleton
+          className={ className }
+          isLoaded={ !isLoading }
+          overflow="hidden"
+          whiteSpace="nowrap"
+      >
+        { children }
+      </Skeleton>
   );
 });
 

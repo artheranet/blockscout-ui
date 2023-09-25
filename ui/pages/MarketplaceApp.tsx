@@ -27,111 +27,111 @@ const IFRAME_SANDBOX_ATTRIBUTE = 'allow-forms allow-orientation-lock ' +
 const IFRAME_ALLOW_ATTRIBUTE = 'clipboard-read; clipboard-write;';
 
 const MarketplaceApp = () => {
-    const ref = useRef<HTMLIFrameElement>(null);
+  const ref = useRef<HTMLIFrameElement>(null);
 
-    const apiFetch = useApiFetch();
-    const appProps = useAppContext();
-    const router = useRouter();
-    const id = getQueryParamString(router.query.id);
+  const apiFetch = useApiFetch();
+  const appProps = useAppContext();
+  const router = useRouter();
+  const id = getQueryParamString(router.query.id);
 
-    const { isLoading, isError, error, data } = useQuery<unknown, ResourceError<unknown>, MarketplaceAppOverview>(
-        [ 'marketplace-apps', id ],
-        async() => {
-            const result = await apiFetch<Array<MarketplaceAppOverview>, unknown>(configUrl);
-            if (!Array.isArray(result)) {
-                throw result;
-            }
+  const { isLoading, isError, error, data } = useQuery<unknown, ResourceError<unknown>, MarketplaceAppOverview>(
+    [ 'marketplace-apps', id ],
+    async() => {
+      const result = await apiFetch<Array<MarketplaceAppOverview>, unknown>(configUrl);
+      if (!Array.isArray(result)) {
+        throw result;
+      }
 
-            const item = result.find((app: MarketplaceAppOverview) => app.id === id);
-            if (!item) {
-                throw { status: 404 };
-            }
+      const item = result.find((app: MarketplaceAppOverview) => app.id === id);
+      if (!item) {
+        throw { status: 404 };
+      }
 
-            return item;
-        },
-        {
-            enabled: feature.isEnabled,
-        },
-    );
+      return item;
+    },
+    {
+      enabled: feature.isEnabled,
+    },
+  );
 
-    const [ isFrameLoading, setIsFrameLoading ] = useState(isLoading);
-    const { colorMode } = useColorMode();
+  const [ isFrameLoading, setIsFrameLoading ] = useState(isLoading);
+  const { colorMode } = useColorMode();
 
-    const handleIframeLoad = useCallback(() => {
-        setIsFrameLoading(false);
-    }, []);
+  const handleIframeLoad = useCallback(() => {
+    setIsFrameLoading(false);
+  }, []);
 
-    useEffect(() => {
-        if (data && !isFrameLoading) {
-            const message = {
-                blockscoutColorMode: colorMode,
-                blockscoutRootUrl: config.app.baseUrl + route({ pathname: '/' }),
-                blockscoutAddressExplorerUrl: config.app.baseUrl + route({ pathname: '/address/[hash]', query: { hash: '' } }),
-                blockscoutTransactionExplorerUrl: config.app.baseUrl + route({ pathname: '/tx/[hash]', query: { hash: '' } }),
-                blockscoutNetworkName: config.chain.name,
-                blockscoutNetworkId: Number(config.chain.id),
-                blockscoutNetworkCurrency: config.chain.currency,
-                blockscoutNetworkRpc: config.chain.rpcUrl,
-            };
+  useEffect(() => {
+    if (data && !isFrameLoading) {
+      const message = {
+        blockscoutColorMode: colorMode,
+        blockscoutRootUrl: config.app.baseUrl + route({ pathname: '/' }),
+        blockscoutAddressExplorerUrl: config.app.baseUrl + route({ pathname: '/address/[hash]', query: { hash: '' } }),
+        blockscoutTransactionExplorerUrl: config.app.baseUrl + route({ pathname: '/tx/[hash]', query: { hash: '' } }),
+        blockscoutNetworkName: config.chain.name,
+        blockscoutNetworkId: Number(config.chain.id),
+        blockscoutNetworkCurrency: config.chain.currency,
+        blockscoutNetworkRpc: config.chain.rpcUrl,
+      };
 
-            ref?.current?.contentWindow?.postMessage(message, data.url);
-        }
-    }, [ isFrameLoading, data, colorMode, ref ]);
+      ref?.current?.contentWindow?.postMessage(message, data.url);
+    }
+  }, [ isFrameLoading, data, colorMode, ref ]);
 
-    useEffect(() => {
-        if (data) {
-            metadata.update(
-                { pathname: '/apps/[id]', query: { id: data.id } },
-                { app_name: data.title },
-            );
-        }
-    }, [ data ]);
+  useEffect(() => {
+    if (data) {
+      metadata.update(
+        { pathname: '/apps/[id]', query: { id: data.id } },
+        { app_name: data.title },
+      );
+    }
+  }, [ data ]);
 
-    if (isError) {
-        throw new Error('Unable to load app', { cause: error });
+  if (isError) {
+    throw new Error('Unable to load app', { cause: error });
+  }
+
+  const backLink = React.useMemo(() => {
+    const hasGoBackLink = appProps.referrer.includes('/apps');
+
+    if (!hasGoBackLink) {
+      return;
     }
 
-    const backLink = React.useMemo(() => {
-        const hasGoBackLink = appProps.referrer.includes('/apps');
+    return {
+      label: 'Back to marketplace',
+      url: appProps.referrer,
+    };
+  }, [ appProps.referrer ]);
 
-        if (!hasGoBackLink) {
-            return;
-        }
+  return (
+    <>
+      { !isLoading && <PageTitle title={ data.title } backLink={ backLink }/> }
+      <Center
+        h="100vh"
+        mx={{ base: -4, lg: -12 }}
+      >
+        { (isFrameLoading) && (
+          <ContentLoader/>
+        ) }
 
-        return {
-            label: 'Back to marketplace',
-            url: appProps.referrer,
-        };
-    }, [ appProps.referrer ]);
-
-    return (
-        <>
-            { !isLoading && <PageTitle title={ data.title } backLink={ backLink }/> }
-            <Center
-                h="100vh"
-                mx={{ base: -4, lg: -12 }}
-            >
-                { (isFrameLoading) && (
-                    <ContentLoader/>
-                ) }
-
-                { data && (
-                    <Box
-                        allow={ IFRAME_ALLOW_ATTRIBUTE }
-                        ref={ ref }
-                        sandbox={ IFRAME_SANDBOX_ATTRIBUTE }
-                        as="iframe"
-                        h="100%"
-                        w="100%"
-                        display={ isFrameLoading ? 'none' : 'block' }
-                        src={ data.url }
-                        title={ data.title }
-                        onLoad={ handleIframeLoad }
-                    />
-                ) }
-            </Center>
-        </>
-    );
+        { data && (
+          <Box
+            allow={ IFRAME_ALLOW_ATTRIBUTE }
+            ref={ ref }
+            sandbox={ IFRAME_SANDBOX_ATTRIBUTE }
+            as="iframe"
+            h="100%"
+            w="100%"
+            display={ isFrameLoading ? 'none' : 'block' }
+            src={ data.url }
+            title={ data.title }
+            onLoad={ handleIframeLoad }
+          />
+        ) }
+      </Center>
+    </>
+  );
 };
 
 export default MarketplaceApp;

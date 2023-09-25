@@ -60,7 +60,7 @@ const Transactions = () => {
     {
       id: 'validated',
       title: verifiedTitle,
-      component: <TxsContent query={ txsQuery } showSocketInfo={ txsQuery.pagination.page === 1 } socketInfoNum={ num } socketInfoAlert={ socketAlert }/>
+      component: <TxsContent query={ txsQuery } showSocketInfo={ txsQuery.pagination.page === 1 } socketInfoNum={ num } socketInfoAlert={ socketAlert }/>,
     },
     // {
     //   id: 'pending',

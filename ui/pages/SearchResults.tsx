@@ -18,6 +18,7 @@ import Pagination from 'ui/shared/pagination/Pagination';
 import Thead from 'ui/shared/TheadSticky';
 import Header from 'ui/snippets/header/Header';
 import useSearchQuery from 'ui/snippets/searchBar/useSearchQuery';
+
 import config from '../../configs/app';
 
 const SearchResultsPageContent = () => {
@@ -173,7 +174,7 @@ const SearchResultsPageContent = () => {
 
   return (
     <>
-      {!config.UI.indexingAlert.isHidden && <IndexingAlertBlocks/>}
+      { !config.UI.indexingAlert.isHidden && <IndexingAlertBlocks/> }
       <Header renderSearchBar={ renderSearchBar }/>
       <AppErrorBoundary>
         <Layout.Content>

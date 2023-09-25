@@ -13,7 +13,6 @@
 # next.js
 /.next/
 /out/
-/public/assets/
 
 # production
 /build
@@ -60,3 +59,5 @@ yarn-error.log*
 /deploy/tools/envs-validator/index.js
 /deploy/tools/envs-validator/envs.ts
 /deploy/tools/envs-validator/schema.ts
+
+.env

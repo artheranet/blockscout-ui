@@ -9,11 +9,11 @@ import PageNextJs from 'nextjs/PageNextJs';
 const MarketplaceApp = dynamic(() => import('ui/pages/MarketplaceApp'), { ssr: false });
 
 const Page: NextPageWithLayout<Props> = (props: Props) => {
-    return (
-        <PageNextJs pathname="/apps/[id]" query={ props }>
-            <MarketplaceApp/>
-        </PageNextJs>
-    );
+  return (
+    <PageNextJs pathname="/apps/[id]" query={ props }>
+      <MarketplaceApp/>
+    </PageNextJs>
+  );
 };
 
 export default Page;

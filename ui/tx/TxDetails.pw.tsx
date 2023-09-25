@@ -5,7 +5,7 @@ import * as txMock from 'mocks/txs/tx';
 import contextWithEnvs from 'playwright/fixtures/contextWithEnvs';
 import TestApp from 'playwright/TestApp';
 import buildApiUrl from 'playwright/utils/buildApiUrl';
-import insertAdPlaceholder from 'playwright/utils/insertAdPlaceholder';
+import * as configs from 'playwright/utils/configs';
 
 import TxDetails from './TxDetails';
 
@@ -23,16 +23,18 @@ test('between addresses +@mobile +@dark-mode', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
   await page.getByText('View details').click();
-  await insertAdPlaceholder(page);
 
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 test('creating contact', async({ mount, page }) => {
@@ -42,15 +44,16 @@ test('creating contact', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 test('with token transfer +@mobile', async({ mount, page }) => {
@@ -60,15 +63,16 @@ test('with token transfer +@mobile', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 test('with decoded revert reason', async({ mount, page }) => {
@@ -78,15 +82,16 @@ test('with decoded revert reason', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 test('with decoded raw reason', async({ mount, page }) => {
@@ -96,15 +101,16 @@ test('with decoded raw reason', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 test('pending', async({ mount, page }) => {
@@ -114,16 +120,18 @@ test('pending', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
   await page.getByText('View details').click();
-  await insertAdPlaceholder(page);
 
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 test('with actions uniswap +@mobile +@dark-mode', async({ mount, page }) => {
@@ -133,14 +141,16 @@ test('with actions uniswap +@mobile +@dark-mode', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 const l2Test = test.extend({
@@ -155,15 +165,16 @@ l2Test('l2', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });
 
 const mainnetTest = test.extend({
@@ -180,13 +191,14 @@ mainnetTest('without testnet warning', async({ mount, page }) => {
   }));
 
   const component = await mount(
-    <TestApp>
-      <TxDetails/>
-    </TestApp>,
-    { hooksConfig },
+      <TestApp>
+        <TxDetails/>
+      </TestApp>,
+      { hooksConfig },
   );
 
-  await insertAdPlaceholder(page);
-
-  await expect(component).toHaveScreenshot();
+  await expect(component).toHaveScreenshot({
+    mask: [ page.locator(configs.adsBannerSelector) ],
+    maskColor: configs.maskColor,
+  });
 });

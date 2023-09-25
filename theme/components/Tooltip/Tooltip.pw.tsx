@@ -9,7 +9,7 @@ test('base view +@dark-mode', async({ mount, page }) => {
     <TestApp>
       <Box m={ 10 }>
         <Tooltip label="Tooltip content">
-          trigger
+            trigger
         </Tooltip>
       </Box>
     </TestApp>,

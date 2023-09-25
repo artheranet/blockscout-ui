@@ -88,12 +88,12 @@ const ContractSourceCode = ({ address, implementationAddress }: Props) => {
     <Skeleton isLoaded={ !isLoading } fontWeight={ 500 }>
       <span>Contract source code</span>
       { activeContract?.language &&
-        <Text whiteSpace="pre" as="span" variant="secondary" textTransform="capitalize"> ({ activeContract.language })</Text> }
+            <Text whiteSpace="pre" as="span" variant="secondary" textTransform="capitalize"> ({ activeContract.language })</Text> }
     </Skeleton>
   );
 
   const diagramLinkAddress = (() => {
-    if (true || !activeContract?.can_be_visualized_via_sol2uml) {
+    if (!activeContract?.can_be_visualized_via_sol2uml) {
       return;
     }
     return sourceType === 'secondary' ? implementationAddress : address;
@@ -106,7 +106,7 @@ const ContractSourceCode = ({ address, implementationAddress }: Props) => {
         ml={{ base: '0', lg: 'auto' }}
       >
         <Skeleton isLoaded={ !isLoading }>
-          View UML diagram
+            View UML diagram
         </Skeleton>
       </LinkInternal>
     </Tooltip>
